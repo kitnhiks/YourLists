@@ -1,0 +1,109 @@
+/** Add css rules here for your application. */
+
+
+body {
+	background: none repeat scroll 0 0 #FFFFFF;
+	font-family:arial;
+	font-size:12px;	
+	color:#000000;
+}
+
+h1{
+	margin:0;
+}
+
+a{
+	font-weight:bold;
+	color:#666666;
+	text-decoration:none;
+}
+
+a:hover, a:focus, a:active{
+	text-decoration:underline;
+}
+
+a img 
+{ 
+	border: none;
+} 
+
+#header {
+	border-bottom:1px solid #CCCCCC;
+	margin:20px;
+}
+
+#footer-content {
+    border-top: 1px solid #CCCCCC;
+    margin: 20px;
+    text-align: right;
+}
+
+#content{
+	margin:0;
+}
+
+
+.priority{
+	background:url("img/priority.png") no-repeat;
+	text-indent: -5000px;
+	height:16px;
+	width:16px;
+}
+
+.priority-1{
+	background-position:0 0;
+}
+
+.priority-2{
+	background-position:0 -16px;
+}
+
+.priority-3{
+	background-position:0 -32px;
+}
+
+.itemPriority-1{
+	color:red;
+}
+
+.itemPriority-2{
+	color:black;
+}
+
+.itemPriority-3{
+	color:blue;
+}
+
+.itemStatus-1{
+	text-decoration: line-through;
+	color:#CCCCCC;
+}
+
+.wait {
+	background:url("img/loading.gif") no-repeat;
+	width:24px;
+	height:24px;
+}
+
+.sendButton {
+  display: block;
+  font-size: 16pt;
+}
+
+/** Most GWT widgets already have a style name defined */
+.gwt-DialogBox {
+  width: 400px;
+}
+
+.dialogVPanel {
+  margin: 5px;
+}
+
+.serverResponseLabelError {
+  color: red;
+}
+
+/** Set ids using widget.getElement().setId("idOfElement") */
+#closeButton {
+  margin: 15px 6px 6px;
+}

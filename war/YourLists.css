@@ -43,38 +43,36 @@ a img
 }
 
 
-.priority{
+.item_priority{
 	background:url("img/priority.png") no-repeat;
 	text-indent: -5000px;
 	height:16px;
 	width:16px;
+	margin:auto;
+	cursor:pointer;
 }
 
-.priority-1{
+.item_priority-0{
 	background-position:0 0;
 }
 
-.priority-2{
+.item_priority-1{
 	background-position:0 -16px;
 }
 
-.priority-3{
+.item_priority-2{
 	background-position:0 -32px;
 }
 
-.itemPriority-1{
+.item_name{
 	color:red;
 }
 
-.itemPriority-2{
+.item_name-0{
 	color:black;
 }
 
-.itemPriority-3{
-	color:blue;
-}
-
-.itemStatus-1{
+.item_name-1{
 	text-decoration: line-through;
 	color:#CCCCCC;
 }

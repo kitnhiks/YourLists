@@ -69,22 +69,24 @@ public class ItemListRESTService {
 	}
 	
 	@PUT
+	@Path("{id}")
 	@Consumes("application/json")
 	/**
 	 * Met à jour une liste (nom de la liste)
 	 * @param itemList
 	 */
-	public void updateItemList(ItemList itemList){
+	public void updateItemList(ItemList itemList, @PathParam("id") Long id){
 		PersistenceManager pm = RESTService.pmfInstance.getPersistenceManager();
 		Transaction tx = pm.currentTransaction();
 		tx.begin();
 		ItemList itemListToUpdate = pm.getObjectById(ItemList.class
-				, itemList.getId());
+				, id);
 		itemListToUpdate.setName(itemList.getName());
 		pm.makePersistent(itemListToUpdate);
 		tx.commit();
 		pm.close();
 	}
+	
 	@DELETE
 	@Path("{id}")
 	@Produces("application/json")

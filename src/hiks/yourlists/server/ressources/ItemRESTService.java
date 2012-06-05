@@ -30,8 +30,9 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.sun.jersey.spi.resource.Singleton;
 
 @Singleton
-@Path("/itemlist/{listid}/item")
+@Path("/itemlist/{listId}/item")
 public class ItemRESTService {
+	//TODO : gestion des retour d'erreur
 
 	@Context
 	UriInfo uriInfo;
@@ -47,20 +48,25 @@ public class ItemRESTService {
 	@GET
 	@Path("{id}")
 	@Produces("application/json")
-	public Item getItem(@PathParam("id") Long id) {
+	public Item getItem(@PathParam("listId") Long listId, @PathParam("id") Long id) {
 		PersistenceManager pm = RESTService.pmfInstance.getPersistenceManager();
-		return pm.getObjectById(Item.class, KeyFactory.createKey(Item.class.getSimpleName(), id));
+		Transaction tx = pm.currentTransaction();
+		Item item = null;
+		tx.begin();
+		ItemList parentList = pm.getObjectById(ItemList.class, listId);
+		item = parentList.getItem(id);
+		return item;
 	}
 
 	@POST
 	@Consumes("application/json")
-	public Response addItemToList(Item item, @PathParam("listid") Long listid){
+	public Response addItemToList(Item item, @PathParam("listId") Long listId){
 		item.setKey(null);
 		PersistenceManager pm = RESTService.pmfInstance.getPersistenceManager();
 		Transaction tx = pm.currentTransaction();
 		try {
 			tx.begin();
-			ItemList parentList = pm.getObjectById(ItemList.class, listid);
+			ItemList parentList = pm.getObjectById(ItemList.class, listId);
 			parentList.addItem(item);
 			pm.makePersistent(parentList);
 			tx.commit();
@@ -76,13 +82,15 @@ public class ItemRESTService {
 	}
 
 	@PUT
+	@Path("{id}")
 	@Consumes("application/json")
-	public void updateItem(Item item, @PathParam("id") Long id){
+	public void updateItem(Item item, @PathParam("listId") Long listId, @PathParam("id") Long id){
 		PersistenceManager pm = RESTService.pmfInstance.getPersistenceManager();
 		Transaction tx = pm.currentTransaction();
 		try {
 			tx.begin();
-			Item itemToUpdate = pm.getObjectById(Item.class, KeyFactory.createKey(Item.class.getSimpleName(), id));
+			ItemList parentList = pm.getObjectById(ItemList.class, listId);
+			Item itemToUpdate = parentList.getItem(id);
 			itemToUpdate.setName(item.getName());
 			itemToUpdate.setPriority(item.getPriority());
 			itemToUpdate.setStatus(item.getStatus());

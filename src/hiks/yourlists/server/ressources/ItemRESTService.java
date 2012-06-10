@@ -4,6 +4,9 @@ import hiks.yourlists.server.model.Item;
 import hiks.yourlists.server.model.ItemList;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.jdo.JDOObjectNotFoundException;
@@ -92,7 +95,7 @@ public class ItemRESTService {
 			ItemList parentList = pm.getObjectById(ItemList.class, listId);
 			Item itemToUpdate = parentList.getItem(id);
 			itemToUpdate.setName(item.getName());
-			itemToUpdate.setPriority(item.getPriority());
+			itemToUpdate.setPosition(item.getPosition());
 			itemToUpdate.setStatus(item.getStatus());
 			pm.makePersistent(itemToUpdate);
 			tx.commit();

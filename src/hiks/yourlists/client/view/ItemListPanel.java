@@ -1,15 +1,21 @@
 package hiks.yourlists.client.view;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import hiks.yourlists.client.model.Item;
 import hiks.yourlists.client.model.ItemList;
 import hiks.yourlists.shared.YourListConst;
 
+import com.gargoylesoftware.htmlunit.AlertHandler;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -41,9 +47,14 @@ public class ItemListPanel extends VerticalPanel{
 
 	private final int COL_ID = 0;
 	private final int COL_NAME = 1;
-	private final int COL_PRIORITY = 2;
+	private final int COL_POSITION = 2;
 	private final int COL_STATUS = 3;
+	private final int FILTER_UP = 0;
+	private final int FILTER_DOWN = 1;
 
+	private int filter = COL_POSITION;
+	private int filterOrder = FILTER_DOWN;
+	
 	private ItemList itemList;
 
 	private Label itemListNameLabel;
@@ -51,10 +62,9 @@ public class ItemListPanel extends VerticalPanel{
 	private Label errorMessage;
 	private HorizontalPanel newItemPanel;
 	private TextBox newItemNameTextBox;
-	private RadioButton highPriorityRadioButton;
-	private RadioButton lowPriorityRadioButton;
-	private RadioButton noPriorityRadioButton;
 	private Button createNewItemButton;
+	private FlowPanel newItemPositionPanel;
+	private Label newItemPositionLabel;
 
 	private final String itemNameDefaultText = "Your item name...";
 
@@ -67,6 +77,7 @@ public class ItemListPanel extends VerticalPanel{
 	/**
 	 * Récupère la liste depuis le service JSON
 	 * @param itemListId l'id de la liste à récupérer
+	 * @param itemListName le nom de la liste à récupérer pour vérifier que c'est bien la bonne
 	 */
 	private void httpGetList(String itemListId, final String itemListName) {
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, YourListConst.JSON_URL_ITEMLIST+ itemListId + "/");
@@ -98,21 +109,7 @@ public class ItemListPanel extends VerticalPanel{
 						}
 
 						// Items
-						JSONArray itemsAsJSONArray = itemListAsJSONObject.get("items").isArray();
-						JSONObject itemsAsJSONObject; 
-						int nbItems = itemsAsJSONArray.size();
-						List<Item> items = new ArrayList<Item>(nbItems);
-						Item tmpItem;
-						for (int i=0; i<nbItems; i++){
-							itemsAsJSONObject = itemsAsJSONArray.get(i).isObject();
-							tmpItem = new Item();
-							tmpItem.setId((long)itemsAsJSONObject.get("key").isObject().get("id").isNumber().doubleValue());
-							tmpItem.setName(itemsAsJSONObject.get("name").isString().stringValue());
-							tmpItem.setPriority((int)itemsAsJSONObject.get("priority").isNumber().doubleValue());
-							tmpItem.setStatus((int)itemsAsJSONObject.get("status").isNumber().doubleValue());
-							items.add(tmpItem); 
-						}
-						itemList.setItems(items);
+						setItems(itemListAsJSONObject.get("items").isArray());
 
 						showItemListPanel();
 					}else{
@@ -127,9 +124,43 @@ public class ItemListPanel extends VerticalPanel{
 	}
 
 	/**
+	 * Récupère les items de la liste depuis le service JSON
+	 * @param itemListId l'id de la liste à récupérer
+	 */
+	private void httpGetItems() {
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, YourListConst.JSON_URL_ITEMS.replace(YourListConst.JSON_VAR_LISTID, itemList.getId().toString()));
+		builder.setHeader("Content-Type", "application/json");
+
+		try {
+			builder.sendRequest(null, new RequestCallback() {
+				public void onError(Request request, Throwable exception) {
+					showError(exception.getMessage());
+				}
+
+				public void onResponseReceived(Request request,	Response response) {
+					if (response.getStatusCode() == Response.SC_OK) {
+						String itemsAsJSONString = response.getText();
+						JSONValue itemsAsJSONValue = JSONParser.parse(itemsAsJSONString);
+
+						// Items
+						setItems(itemsAsJSONValue.isArray());
+
+						showItems();
+					}else{
+						// TODO: error Handling ...
+						showError(String.valueOf(response.getStatusCode()));
+					}
+				}
+			});
+		} catch (RequestException e) {
+			System.out.println("RequestException : "+e.getMessage());
+		}
+	}
+	
+	/**
 	 * Ajoute l'item via une requête JSON
 	 */
-	protected void addItem(Item newItem) {
+	protected void httpAddItem(Item newItem) {
 
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, YourListConst.JSON_URL_ITEM.replace(YourListConst.JSON_VAR_LISTID, itemList.getId().toString()));
 		builder.setHeader("Content-Type", "application/json");
@@ -145,6 +176,8 @@ public class ItemListPanel extends VerticalPanel{
 					if (response.getStatusCode() == Response.SC_CREATED) {
 						// Clear the form
 						clearAddItemZone();
+						newItemNameTextBox.selectAll();
+						newItemNameTextBox.setFocus(true);
 
 						// Refresh the view
 						httpRefreshItemList();
@@ -162,7 +195,7 @@ public class ItemListPanel extends VerticalPanel{
 	/**
 	 * Update l'item via une requête JSON
 	 */
-	protected void putItem(Item item) {
+	protected void httpUpdateItem(Item item) {
 
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.PUT, YourListConst.JSON_URL_ITEM.replace(YourListConst.JSON_VAR_LISTID, itemList.getId().toString())+item.getId());
 		builder.setHeader("Content-Type", "application/json");
@@ -210,21 +243,7 @@ public class ItemListPanel extends VerticalPanel{
 						JSONObject itemListAsJSONObject = itemListAsJSONValue.isObject();
 
 						// Items
-						JSONArray itemsAsJSONArray = itemListAsJSONObject.get("items").isArray();
-						JSONObject itemsAsJSONObject; 
-						int nbItems = itemsAsJSONArray.size();
-						List<Item> items = new ArrayList<Item>(nbItems);
-						Item tmpItem;
-						for (int i=0; i<nbItems; i++){
-							itemsAsJSONObject = itemsAsJSONArray.get(i).isObject();
-							tmpItem = new Item();
-							tmpItem.setId((long)itemsAsJSONObject.get("key").isObject().get("id").isNumber().doubleValue());
-							tmpItem.setName(itemsAsJSONObject.get("name").isString().stringValue());
-							tmpItem.setPriority((int)itemsAsJSONObject.get("priority").isNumber().doubleValue());
-							tmpItem.setStatus((int)itemsAsJSONObject.get("status").isNumber().doubleValue());
-							items.add(tmpItem); 
-						}
-						itemList.setItems(items);
+						setItems(itemListAsJSONObject.get("items").isArray());
 
 						showItems();
 					}else{
@@ -292,53 +311,85 @@ public class ItemListPanel extends VerticalPanel{
 	 */
 	private void showAddItemZone() {
 		newItemPanel = new HorizontalPanel();
+		
 		// Name
 		newItemNameTextBox = new TextBoxWithInnerText(itemNameDefaultText);
 		newItemPanel.add(newItemNameTextBox);
-
-		// Priority
+		newItemPanel.setCellHorizontalAlignment(newItemNameTextBox, HasHorizontalAlignment.ALIGN_CENTER);
+		newItemPanel.setCellVerticalAlignment(newItemNameTextBox, HasVerticalAlignment.ALIGN_MIDDLE);
+		newItemNameTextBox.addKeyDownHandler(new KeyDownHandler(){
+			@Override
+			public void onKeyDown(KeyDownEvent event) {
+				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER){
+					addNewItem();
+				}
+			}
+			
+		});
+		
+		// Position
 		//TODO : replace avec une image qui change quand on click dessus
-		highPriorityRadioButton = new RadioButton("priority", "high");
-		lowPriorityRadioButton = new RadioButton("priority", "low");
-		noPriorityRadioButton = new RadioButton("priority", "none");
-		noPriorityRadioButton.setValue(true);
-
-		newItemPanel.add(highPriorityRadioButton);
-		newItemPanel.add(lowPriorityRadioButton);
-		newItemPanel.add(noPriorityRadioButton);
+		// TODO : en faire un objet
+		newItemPositionPanel = new FlowPanel();
+		newItemPositionPanel.setStylePrimaryName("item_position");
+		newItemPositionPanel.addStyleDependentName("1");
+		newItemPositionLabel = new Label("1");
+		newItemPositionPanel.add(newItemPositionLabel);
+		newItemPanel.add(newItemPositionPanel);
+		newItemPanel.setCellHorizontalAlignment(newItemPositionPanel, HasHorizontalAlignment.ALIGN_CENTER);
+		newItemPanel.setCellVerticalAlignment(newItemPositionPanel, HasVerticalAlignment.ALIGN_MIDDLE);
+		newItemPositionLabel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				int newItemPosition = Integer.parseInt(((Label) event.getSource()).getText());
+				newItemPosition = (newItemPosition+1)%3;
+				newItemPositionPanel.removeStyleDependentName(newItemPositionLabel.getText());
+				newItemPositionPanel.addStyleDependentName(String.valueOf(newItemPosition));
+				newItemPositionLabel.setText(String.valueOf(newItemPosition));
+			}
+		});
+		
 
 		// Bouton pour ajouter l'item
 		createNewItemButton = new Button("Add");
-		createNewItemButton.addClickHandler(new ClickHandler() {
+		createNewItemButton.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
-				if (itemNameDefaultText.equals(newItemNameTextBox.getText())){
-					return;
-				}
-				Item newItem = new Item();
-				// Name
-				newItem.setName(getNewItemName());
-
-				// Priority
-				newItem.setPriority(getNewItemPriority());
-
-				// Status
-				newItem.setStatus(0);
-
-				addItem(newItem);
+				addNewItem();
 			}
 		});
-
 		newItemPanel.add(createNewItemButton);
+		newItemPanel.setCellHorizontalAlignment(createNewItemButton, HasHorizontalAlignment.ALIGN_CENTER);
+		newItemPanel.setCellVerticalAlignment(createNewItemButton, HasVerticalAlignment.ALIGN_MIDDLE);
+		
 		this.add(newItemPanel);
 	}
 
+	private void addNewItem(){
+		if (itemNameDefaultText.equals(newItemNameTextBox.getText())){
+			return;
+		}
+		Item newItem = new Item();
+		// Name
+		newItem.setName(getNewItemName());
+
+		// Position
+		newItem.setPosition(getNewItemPosition());
+
+		// Status
+		newItem.setStatus(0);
+
+		httpAddItem(newItem);
+	}
+	
 	/**
 	 * Vide le formulaire d'ajout d'Item
 	 */
 	private void clearAddItemZone(){
 		newItemNameTextBox.setText(itemNameDefaultText);
-		noPriorityRadioButton.setValue(true);
+		newItemPositionPanel.removeStyleDependentName(newItemPositionLabel.getText());
+		newItemPositionPanel.addStyleDependentName("1");
+		newItemPositionLabel.setText("1");
 	}
 
 	/**
@@ -359,9 +410,11 @@ public class ItemListPanel extends VerticalPanel{
 		int nbItem = itemList.getItems()== null?0:itemList.getItems().size();
 
 		itemsTable.clear();
-		itemsTable.setText(0, COL_NAME, "TODO");
-		itemsTable.setText(0, COL_PRIORITY, "PRIORITY");
-		itemsTable.setText(0, COL_STATUS, "STATUS");
+		// TODO : Faire des objets de type Titre
+		itemsTable.setWidget(0, COL_NAME, new Label("TODO"));
+		itemsTable.getWidget(0, COL_NAME);
+		itemsTable.setWidget(0, COL_POSITION, new Label("POSITION"));
+		itemsTable.setWidget(0, COL_STATUS, new Label("STATUS"));
 		Item tempItem;
 
 		for (int i=0; i<nbItem; i++){
@@ -386,14 +439,33 @@ public class ItemListPanel extends VerticalPanel{
 		itemsTable.setWidget(row, COL_NAME, new Label(item.getName()));
 		itemsTable.getWidget(row, COL_NAME).setStylePrimaryName("item_name");
 
-		// Item Priority
-		String priority = String.valueOf(item.getPriority());
-		FlowPanel priorityPanel = new FlowPanel();
-		priorityPanel.setStylePrimaryName("item_priority");
-		priorityPanel.addStyleDependentName(priority);
-		Label priorityLabel = new Label(priority);
-		priorityPanel.add(priorityLabel);
-		itemsTable.setWidget(row, COL_PRIORITY, priorityPanel);
+		// Item Position
+		String position = String.valueOf(item.getPosition());
+		FlowPanel positionPanel = new FlowPanel();
+		positionPanel.setStylePrimaryName("item_position");
+		positionPanel.addStyleDependentName(position);
+		Label positionLabel = new Label(position);
+		positionPanel.add(positionLabel);
+		itemsTable.setWidget(row, COL_POSITION, positionPanel);
+		
+		if (item.getStatus()==0){
+			positionLabel.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					Item rowItem = itemList.getItems().get(row-1);
+
+					int position = Integer.parseInt(((Label) event.getSource()).getText());
+					FlowPanel positionPanel = (FlowPanel) itemsTable.getWidget(row, COL_POSITION);
+					positionPanel.removeStyleDependentName(String.valueOf(position));
+					position = (position+1)%3;
+					positionPanel.addStyleDependentName(String.valueOf(position));
+					rowItem.setPosition(position);
+					httpUpdateItem(rowItem);
+				}
+			});
+		}else{
+			positionPanel.addStyleName("disabled");
+		}
 
 		// Item Status
 		CheckBox statusCheckBox = new CheckBox();
@@ -410,26 +482,13 @@ public class ItemListPanel extends VerticalPanel{
 				int status = statusCheckBox.getValue()?1:0;
 				rowItem.setStatus(status);
 				itemsTable.getWidget(row, COL_NAME).addStyleDependentName(String.valueOf(rowItem.getStatus()));
-				putItem(rowItem);
+				itemsTable.getWidget(row, COL_POSITION).addStyleName("disabled");
+				httpUpdateItem(rowItem);
 				statusCheckBox.setEnabled(true);
 			}
 		});
 
-		if (item.getStatus()==0){
-			priorityLabel.addClickHandler(new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					Item rowItem = itemList.getItems().get(row-1);
-
-					int priority = Integer.parseInt(((Label) event.getSource()).getText());
-					FlowPanel priorityPanel = (FlowPanel) itemsTable.getWidget(row, COL_PRIORITY);
-					priority = (priority+1)%3;
-					priorityPanel.addStyleDependentName(String.valueOf(priority));
-					rowItem.setPriority(priority);
-					putItem(rowItem);
-				}
-			});
-		}
+		
 
 	}
 
@@ -459,15 +518,15 @@ public class ItemListPanel extends VerticalPanel{
 		//			ButtonWithWait b = (ButtonWithWait) element;
 		//			b.startWaiting();
 	}
-
+	
 	// JSON
 
 	private JSONObject buildJSONItem(Item item) {
 		JSONObject itemAsJSONObject = new JSONObject();
 		JSONValue itemNameJSONValue = new JSONString(item.getName());
 		itemAsJSONObject.put("name", itemNameJSONValue);
-		JSONValue itemPriorityJSONValue = new JSONNumber(item.getPriority());
-		itemAsJSONObject.put("priority", itemPriorityJSONValue);
+		JSONValue itemPositionJSONValue = new JSONNumber(item.getPosition());
+		itemAsJSONObject.put("position", itemPositionJSONValue);
 		JSONValue itemStatusJSONValue = new JSONNumber(item.getStatus());
 		itemAsJSONObject.put("status", itemStatusJSONValue);
 		return itemAsJSONObject;
@@ -479,13 +538,38 @@ public class ItemListPanel extends VerticalPanel{
 		return newItemNameTextBox.getText();
 	}
 
-	public int getNewItemPriority(){
-		int priority=1;
-		if (highPriorityRadioButton.getValue()){
-			priority = 0;
-		}else if (lowPriorityRadioButton.getValue()){
-			priority = 2;
+	public int getNewItemPosition(){
+		return Integer.parseInt(newItemPositionLabel.getText());
+	}
+	
+	private void setItems(JSONArray itemsAsJSONArray){
+		JSONObject itemsAsJSONObject;
+		int nbItems = itemsAsJSONArray.size();
+		List<Item> items = new ArrayList<Item>(nbItems);
+		Item tmpItem;
+		for (int i=0; i<nbItems; i++){
+			itemsAsJSONObject = itemsAsJSONArray.get(i).isObject();
+			tmpItem = new Item();
+			tmpItem.setId((long)itemsAsJSONObject.get("key").isObject().get("id").isNumber().doubleValue());
+			tmpItem.setName(itemsAsJSONObject.get("name").isString().stringValue());
+			tmpItem.setPosition((int)itemsAsJSONObject.get("position").isNumber().doubleValue());
+			tmpItem.setStatus((int)itemsAsJSONObject.get("status").isNumber().doubleValue());
+			items.add(tmpItem); 
 		}
-		return priority;
+		// TODO : gérer les autres colonnes que priorité (Collections.sort ?)
+		Collections.sort(items, new Comparator<Item>(){
+			@Override
+			public int compare(Item o1, Item o2) {
+				if (o1.getPosition()>o2.getPosition()){
+					return 1;
+				}else if (o1.getPosition()<o2.getPosition()){
+					return -1;
+				}else{
+					return new Long(o1.getId()).compareTo(new Long(o2.getId()));
+				}
+			}
+		});
+		
+		itemList.setItems(items);
 	}
 }

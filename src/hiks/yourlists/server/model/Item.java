@@ -21,7 +21,7 @@ public class Item {
     private int status;
 
     @Persistent
-    private int priority;
+    private int position;
 
     public Item() {
 
@@ -78,17 +78,18 @@ public class Item {
 
 
 	/**
-	 * @return the priority
+	 * @return the position
 	 */
-	public int getPriority() {
-		return priority;
+	public int getPosition() {
+		return position;
 	}
 
 
 	/**
-	 * @param priority the priority to set
+	 * @param position the position to set
 	 */
-	public void setPriority(int priority) {
-		this.priority = priority;
+	public void setPosition(int position) {
+		this.position = position;
 	}
+
 }

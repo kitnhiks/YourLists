@@ -57,7 +57,7 @@ public class ItemListCreationPanel extends VerticalPanel{
 				if (itemListNameDefaultText.equals(itemListNameTextBox.getText())){
 					return;
 				}
-				createListe();
+				httpCreateListe();
 			}
 		});
 		// TODO : Ajouter le style du bouton
@@ -69,7 +69,7 @@ public class ItemListCreationPanel extends VerticalPanel{
 
 	// REQUETAGE
 
-	protected void createListe() {
+	protected void httpCreateListe() {
 
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, YourListConst.JSON_URL_ITEMLIST);
 		builder.setHeader("Content-Type", "application/json");

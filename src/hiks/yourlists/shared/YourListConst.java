@@ -7,4 +7,5 @@ public class YourListConst {
 	public static final String JSON_URL_ITEMLIST = GWT.getHostPageBaseURL()	+ "itemlist/";
 	public static final String JSON_VAR_LISTID = "{listid}";
 	public static final String JSON_URL_ITEM = JSON_URL_ITEMLIST+JSON_VAR_LISTID+"/item/";
+	public static final String JSON_URL_ITEMS = JSON_URL_ITEMLIST+JSON_VAR_LISTID+"/items/";
 }

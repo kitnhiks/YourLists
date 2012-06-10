@@ -1,107 +1,94 @@
 /** Add css rules here for your application. */
-
-
 body {
 	background: none repeat scroll 0 0 #FFFFFF;
-	font-family:arial;
-	font-size:12px;	
-	color:#000000;
+	font-family: arial;
+	font-size: 12px;
+	color: #000000;
 }
 
-h1{
-	margin:0;
+h1 {
+	margin: 0;
 }
 
-a{
-	font-weight:bold;
-	color:#666666;
-	text-decoration:none;
+a {
+	font-weight: bold;
+	color: #666666;
+	text-decoration: none;
 }
 
-a:hover, a:focus, a:active{
-	text-decoration:underline;
+a:hover,a:focus,a:active {
+	text-decoration: underline;
 }
 
-a img 
-{ 
+a img {
 	border: none;
-} 
+}
 
 #header {
-	border-bottom:1px solid #CCCCCC;
-	margin:20px;
+	border-bottom: 1px solid #CCCCCC;
+	margin: 20px;
 }
 
 #footer-content {
-    border-top: 1px solid #CCCCCC;
-    margin: 20px;
-    text-align: right;
+	border-top: 1px solid #CCCCCC;
+	margin: 20px;
+	text-align: right;
 }
 
-#content{
-	margin:0;
+#content {
+	margin: 0;
 }
 
-
-.item_priority{
-	background:url("img/priority.png") no-repeat;
-	text-indent: -5000px;
-	height:16px;
-	width:16px;
-	margin:auto;
-	cursor:pointer;
+.item_position {
+	height: 16px;
+	width: 16px;
+	margin: auto;
+	cursor: pointer;
 }
 
-.item_priority-0{
-	background-position:0 0;
+.item_name {
+	color: red;
 }
 
-.item_priority-1{
-	background-position:0 -16px;
+.item_name-0 {
+	color: black;
 }
 
-.item_priority-2{
-	background-position:0 -32px;
-}
-
-.item_name{
-	color:red;
-}
-
-.item_name-0{
-	color:black;
-}
-
-.item_name-1{
+.item_name-1 {
 	text-decoration: line-through;
-	color:#CCCCCC;
+	color: #CCCCCC;
 }
 
 .wait {
-	background:url("img/loading.gif") no-repeat;
-	width:24px;
-	height:24px;
+	background: url("img/loading.gif") no-repeat;
+	width: 24px;
+	height: 24px;
 }
 
 .sendButton {
-  display: block;
-  font-size: 16pt;
+	display: block;
+	font-size: 16pt;
+}
+
+.disabled {
+	filter:alpha(opacity=30);
+	opacity:0.3;
 }
 
 /** Most GWT widgets already have a style name defined */
 .gwt-DialogBox {
-  width: 400px;
+	width: 400px;
 }
 
 .dialogVPanel {
-  margin: 5px;
+	margin: 5px;
 }
 
 .serverResponseLabelError {
-  color: red;
+	color: red;
 }
 
 /** Set ids using widget.getElement().setId("idOfElement") */
 #closeButton {
-  margin: 15px 6px 6px;
+	margin: 15px 6px 6px;
 }

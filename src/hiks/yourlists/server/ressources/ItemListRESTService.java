@@ -1,5 +1,6 @@
 package hiks.yourlists.server.ressources;
 
+import hiks.yourlists.server.model.Item;
 import hiks.yourlists.server.model.ItemList;
 
 import java.net.URI;
@@ -45,13 +46,29 @@ public class ItemListRESTService {
 	@Path("{id}")
 	@Produces("application/json")
 	/**
-	 * Récupère le liste à partir de son id
+	 * Récupère la liste à partir de son id
 	 * @param id
 	 * @return la liste
 	 */
 	public ItemList getItemList(@PathParam("id") Long id) {
 		PersistenceManager pm = RESTService.pmfInstance.getPersistenceManager();
-		return pm.getObjectById(ItemList.class, id);
+		ItemList itemList = pm.getObjectById(ItemList.class, id);
+		return itemList;
+	}
+	
+	@GET
+	@Path("{id}/items")
+	@Produces("application/json")
+	/**
+	 * Récupère la liste des items à partir de son id
+	 * @param id
+	 * @return la liste
+	 */
+	public List<Item> getItems(@PathParam("id") Long id) {
+		PersistenceManager pm = RESTService.pmfInstance.getPersistenceManager();
+		ItemList itemList = pm.getObjectById(ItemList.class, id);
+		// TODO : 
+		return null;
 	}
 	
 	@POST

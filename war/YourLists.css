@@ -3,7 +3,7 @@ body {
 	background: none repeat scroll 0 0 #FFFFFF;
 	font-family: arial;
 	font-size: 12px;
-	color: #000000;
+	color: #98BA9D;
 }
 
 h1 {
@@ -39,6 +39,10 @@ a img {
 	margin: 0;
 }
 
+input.error{
+	border-color: red;
+}
+
 .item_position {
 	height: 16px;
 	width: 16px;
@@ -46,15 +50,17 @@ a img {
 	cursor: pointer;
 }
 
+.item_position-disable {
+	text-decoration: line-through;
+	color: #CCCCCC;
+}
+
 .item_name {
-	color: red;
+	font-weight: bold;
 }
 
-.item_name-0 {
-	color: black;
-}
-
-.item_name-1 {
+.item_name-disable {
+	font-weight: normal;
 	text-decoration: line-through;
 	color: #CCCCCC;
 }
@@ -75,20 +81,22 @@ a img {
 	opacity:0.3;
 }
 
-/** Most GWT widgets already have a style name defined */
-.gwt-DialogBox {
-	width: 400px;
-}
-
-.dialogVPanel {
-	margin: 5px;
-}
-
-.serverResponseLabelError {
+#errorLabel {
 	color: red;
 }
 
-/** Set ids using widget.getElement().setId("idOfElement") */
-#closeButton {
-	margin: 15px 6px 6px;
+#messageLabel {
+	color: orange;
+}
+
+#spinner{
+	position:absolute;
+	z-index:9999999999;
+	left:0px;
+	top:0px;
+	right:0px;
+	bottom:0px;
+	filter:alpha(opacity=60);
+	opacity:0.6;
+	background-color:#000;
 }

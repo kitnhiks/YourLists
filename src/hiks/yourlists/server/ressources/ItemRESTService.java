@@ -4,9 +4,6 @@ import hiks.yourlists.server.model.Item;
 import hiks.yourlists.server.model.ItemList;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.jdo.JDOObjectNotFoundException;
@@ -26,9 +23,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.datanucleus.exceptions.NucleusObjectNotFoundException;
-
-import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.sun.jersey.spi.resource.Singleton;
 

@@ -1,20 +1,22 @@
 package hiks.yourlists.client;
 
-import org.mortbay.util.UrlEncoded;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import hiks.yourlists.client.view.ItemListCreationPanel;
 import hiks.yourlists.client.view.ItemListPanel;
+import hiks.yourlists.shared.YourListConst;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -22,8 +24,11 @@ import hiks.yourlists.client.view.ItemListPanel;
 public class YourLists implements EntryPoint, ValueChangeHandler<String> {
 
 	private VerticalPanel wizardPanel;
+	protected Logger logger = Logger.getLogger("YourListsLogger");
 
 	public void onModuleLoad() {
+		logger.log(Level.FINEST, "Ouverture de la page...");
+		Window.setTitle(YourListConst.PAGE_TITLE);
 		// Add history listener
 		History.addValueChangeHandler(this);
 		History.fireCurrentHistoryState();

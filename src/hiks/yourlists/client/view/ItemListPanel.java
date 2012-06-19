@@ -4,46 +4,30 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
 
 import hiks.yourlists.client.model.Item;
 import hiks.yourlists.client.model.ItemList;
 import hiks.yourlists.shared.YourListConst;
 
-import com.gargoylesoftware.htmlunit.AlertHandler;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.Hidden;
 
-public class ItemListPanel extends VerticalPanel{
+public class ItemListPanel extends WizardPanel{
 
 	private final int COL_ID = 0;
 	private final int COL_NAME = 1;
@@ -54,7 +38,9 @@ public class ItemListPanel extends VerticalPanel{
 
 	private int filter = COL_POSITION;
 	private int filterOrder = FILTER_DOWN;
-	
+
+	private int newItemPosition;
+
 	private ItemList itemList;
 
 	private Label itemListNameLabel;
@@ -63,199 +49,15 @@ public class ItemListPanel extends VerticalPanel{
 	private HorizontalPanel newItemPanel;
 	private TextBox newItemNameTextBox;
 	private Button createNewItemButton;
-	private FlowPanel newItemPositionPanel;
-	private Label newItemPositionLabel;
 
 	private final String itemNameDefaultText = "Your item name...";
 
 	public ItemListPanel(String itemListId, String itemListName){
+		super();
 		// Récupérer la liste
 		httpGetList (itemListId, itemListName);
 	}
 
-	// REQUETAGE
-	/**
-	 * Récupère la liste depuis le service JSON
-	 * @param itemListId l'id de la liste à récupérer
-	 * @param itemListName le nom de la liste à récupérer pour vérifier que c'est bien la bonne
-	 */
-	private void httpGetList(String itemListId, final String itemListName) {
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, YourListConst.JSON_URL_ITEMLIST+ itemListId + "/");
-		builder.setHeader("Content-Type", "application/json");
-
-		try {
-			builder.sendRequest(null, new RequestCallback() {
-				public void onError(Request request, Throwable exception) {
-					showError(exception.getMessage());
-				}
-
-				public void onResponseReceived(Request request,	Response response) {
-					if (response.getStatusCode() == Response.SC_OK) {
-						String itemListAsJSONString = response.getText();
-						JSONValue itemListAsJSONValue = JSONParser.parse(itemListAsJSONString);
-						JSONObject itemListAsJSONObject = itemListAsJSONValue.isObject();
-
-						itemList = new ItemList();
-
-						// List Id
-						itemList.setId((long) itemListAsJSONObject.get("id").isNumber().doubleValue());
-
-						// List Name
-						itemList.setName(itemListAsJSONObject.get("name").isString().stringValue());
-						if (!itemListName.equals(itemList.getName())){
-							// TODO: error Handling ...
-							showError("404:List not found");
-							return;
-						}
-
-						// Items
-						setItems(itemListAsJSONObject.get("items").isArray());
-
-						showItemListPanel();
-					}else{
-						// TODO: error Handling ...
-						showError(String.valueOf(response.getStatusCode()));
-					}
-				}
-			});
-		} catch (RequestException e) {
-			System.out.println("RequestException : "+e.getMessage());
-		}
-	}
-
-	/**
-	 * Récupère les items de la liste depuis le service JSON
-	 * @param itemListId l'id de la liste à récupérer
-	 */
-	private void httpGetItems() {
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, YourListConst.JSON_URL_ITEMS.replace(YourListConst.JSON_VAR_LISTID, itemList.getId().toString()));
-		builder.setHeader("Content-Type", "application/json");
-
-		try {
-			builder.sendRequest(null, new RequestCallback() {
-				public void onError(Request request, Throwable exception) {
-					showError(exception.getMessage());
-				}
-
-				public void onResponseReceived(Request request,	Response response) {
-					if (response.getStatusCode() == Response.SC_OK) {
-						String itemsAsJSONString = response.getText();
-						JSONValue itemsAsJSONValue = JSONParser.parse(itemsAsJSONString);
-
-						// Items
-						setItems(itemsAsJSONValue.isArray());
-
-						showItems();
-					}else{
-						// TODO: error Handling ...
-						showError(String.valueOf(response.getStatusCode()));
-					}
-				}
-			});
-		} catch (RequestException e) {
-			System.out.println("RequestException : "+e.getMessage());
-		}
-	}
-	
-	/**
-	 * Ajoute l'item via une requête JSON
-	 */
-	protected void httpAddItem(Item newItem) {
-
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, YourListConst.JSON_URL_ITEM.replace(YourListConst.JSON_VAR_LISTID, itemList.getId().toString()));
-		builder.setHeader("Content-Type", "application/json");
-
-		JSONObject itemAsJSONObject = buildJSONItem(newItem);
-		try {
-			builder.sendRequest(itemAsJSONObject.toString(), new RequestCallback() {
-				public void onError(Request request, Throwable exception) {
-					showError(exception.getMessage());
-				}
-
-				public void onResponseReceived(Request request, Response response) {
-					if (response.getStatusCode() == Response.SC_CREATED) {
-						// Clear the form
-						clearAddItemZone();
-						newItemNameTextBox.selectAll();
-						newItemNameTextBox.setFocus(true);
-
-						// Refresh the view
-						httpRefreshItemList();
-					}else{
-						showError(String.valueOf(response.getStatusCode()));
-					}
-				}
-			});
-		} catch (RequestException e) {
-			System.out.println("RequestException : "+e.getMessage());
-		}
-
-	}
-
-	/**
-	 * Update l'item via une requête JSON
-	 */
-	protected void httpUpdateItem(Item item) {
-
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.PUT, YourListConst.JSON_URL_ITEM.replace(YourListConst.JSON_VAR_LISTID, itemList.getId().toString())+item.getId());
-		builder.setHeader("Content-Type", "application/json");
-
-		JSONObject itemAsJSONObject = buildJSONItem(item);
-		try {
-			builder.sendRequest(itemAsJSONObject.toString(), new RequestCallback() {
-				public void onError(Request request, Throwable exception) {
-					showError(exception.getMessage());
-				}
-
-				public void onResponseReceived(Request request, Response response) {
-					if (response.getStatusCode() == Response.SC_NO_CONTENT) {
-						// Clear the form
-						clearAddItemZone();
-
-						// Refresh the view
-						httpRefreshItemList();
-					}else{
-						showError(String.valueOf(response.getStatusCode()));
-					}
-				}
-			});
-		} catch (RequestException e) {
-			System.out.println("RequestException : "+e.getMessage());
-		}
-
-	}
-
-
-	protected void httpRefreshItemList() {
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, YourListConst.JSON_URL_ITEMLIST+ itemList.getId() + "/");
-		builder.setHeader("Content-Type", "application/json");
-
-		try {
-			builder.sendRequest(null, new RequestCallback() {
-				public void onError(Request request, Throwable exception) {
-					showError(exception.getMessage());
-				}
-
-				public void onResponseReceived(Request request,	Response response) {
-					if (response.getStatusCode() == Response.SC_OK) {
-						String itemListAsJSONString = response.getText();
-						JSONValue itemListAsJSONValue = JSONParser.parse(itemListAsJSONString);
-						JSONObject itemListAsJSONObject = itemListAsJSONValue.isObject();
-
-						// Items
-						setItems(itemListAsJSONObject.get("items").isArray());
-
-						showItems();
-					}else{
-						showError(String.valueOf(response.getStatusCode()));
-					}
-				}
-			});
-		} catch (RequestException e) {
-			System.out.println("RequestException : "+e.getMessage());
-		}
-
-	}
 
 	// AFFICHAGE
 
@@ -266,8 +68,6 @@ public class ItemListPanel extends VerticalPanel{
 		// Le champ du nom de la liste
 		itemListNameLabel = new Label(itemList.getName());
 		this.add(itemListNameLabel);
-		this.setCellHorizontalAlignment(itemListNameLabel, HasHorizontalAlignment.ALIGN_CENTER);
-		this.setCellVerticalAlignment(itemListNameLabel, HasVerticalAlignment.ALIGN_MIDDLE);
 
 		// La zone pour ajouter un item
 		showAddItemZone();
@@ -281,14 +81,12 @@ public class ItemListPanel extends VerticalPanel{
 		refreshListButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				httpRefreshItemList();
+				httpGetItems();
 			}
 		});
 		// TODO : Ajouter le style du bouton
 		// TODO : ajouter les index de tabulation
 		this.add(refreshListButton);
-		this.setCellHorizontalAlignment(refreshListButton, HasHorizontalAlignment.ALIGN_RIGHT);
-		this.setCellVerticalAlignment(refreshListButton, HasVerticalAlignment.ALIGN_MIDDLE);
 
 		// Le bouton de retour à la création d'une liste
 		Button backToCreateListButton = new Button("Create a new list");
@@ -301,8 +99,6 @@ public class ItemListPanel extends VerticalPanel{
 		// TODO : Ajouter le style du bouton
 		// TODO : ajouter les index de tabulation
 		this.add(backToCreateListButton);
-		this.setCellHorizontalAlignment(backToCreateListButton, HasHorizontalAlignment.ALIGN_RIGHT);
-		this.setCellVerticalAlignment(backToCreateListButton, HasVerticalAlignment.ALIGN_MIDDLE);
 
 	}
 
@@ -311,85 +107,37 @@ public class ItemListPanel extends VerticalPanel{
 	 */
 	private void showAddItemZone() {
 		newItemPanel = new HorizontalPanel();
-		
-		// Name
-		newItemNameTextBox = new TextBoxWithInnerText(itemNameDefaultText);
-		newItemPanel.add(newItemNameTextBox);
-		newItemPanel.setCellHorizontalAlignment(newItemNameTextBox, HasHorizontalAlignment.ALIGN_CENTER);
-		newItemPanel.setCellVerticalAlignment(newItemNameTextBox, HasVerticalAlignment.ALIGN_MIDDLE);
-		newItemNameTextBox.addKeyDownHandler(new KeyDownHandler(){
-			@Override
-			public void onKeyDown(KeyDownEvent event) {
-				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER){
-					addNewItem();
-				}
-			}
-			
-		});
-		
-		// Position
-		//TODO : replace avec une image qui change quand on click dessus
-		// TODO : en faire un objet
-		newItemPositionPanel = new FlowPanel();
-		newItemPositionPanel.setStylePrimaryName("item_position");
-		newItemPositionPanel.addStyleDependentName("1");
-		newItemPositionLabel = new Label("1");
-		newItemPositionPanel.add(newItemPositionLabel);
-		newItemPanel.add(newItemPositionPanel);
-		newItemPanel.setCellHorizontalAlignment(newItemPositionPanel, HasHorizontalAlignment.ALIGN_CENTER);
-		newItemPanel.setCellVerticalAlignment(newItemPositionPanel, HasVerticalAlignment.ALIGN_MIDDLE);
-		newItemPositionLabel.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				int newItemPosition = Integer.parseInt(((Label) event.getSource()).getText());
-				newItemPosition = (newItemPosition+1)%3;
-				newItemPositionPanel.removeStyleDependentName(newItemPositionLabel.getText());
-				newItemPositionPanel.addStyleDependentName(String.valueOf(newItemPosition));
-				newItemPositionLabel.setText(String.valueOf(newItemPosition));
-			}
-		});
-		
 
-		// Bouton pour ajouter l'item
-		createNewItemButton = new Button("Add");
-		createNewItemButton.addClickHandler(new ClickHandler(){
+		// Name
+		newItemNameTextBox = new TextBoxWithInnerTextSubmit(itemNameDefaultText, true){
 			@Override
-			public void onClick(ClickEvent event) {
+			protected void onSubmit(){
 				addNewItem();
 			}
-		});
-		newItemPanel.add(createNewItemButton);
-		newItemPanel.setCellHorizontalAlignment(createNewItemButton, HasHorizontalAlignment.ALIGN_CENTER);
-		newItemPanel.setCellVerticalAlignment(createNewItemButton, HasVerticalAlignment.ALIGN_MIDDLE);
-		
+		};
+		newItemPanel.add(newItemNameTextBox);
+
+		// Position
+
+		// Bouton pour ajouter l'item
+		// TODO : remove bouton
+		//		createNewItemButton = new Button("Add");
+		//		createNewItemButton.addClickHandler(new ClickHandler(){
+		//			@Override
+		//			public void onClick(ClickEvent event) {
+		//				addNewItem();
+		//			}
+		//		});
+		//		newItemPanel.add(createNewItemButton);
+
 		this.add(newItemPanel);
 	}
 
-	private void addNewItem(){
-		if (itemNameDefaultText.equals(newItemNameTextBox.getText())){
-			return;
-		}
-		Item newItem = new Item();
-		// Name
-		newItem.setName(getNewItemName());
-
-		// Position
-		newItem.setPosition(getNewItemPosition());
-
-		// Status
-		newItem.setStatus(0);
-
-		httpAddItem(newItem);
-	}
-	
 	/**
 	 * Vide le formulaire d'ajout d'Item
 	 */
 	private void clearAddItemZone(){
 		newItemNameTextBox.setText(itemNameDefaultText);
-		newItemPositionPanel.removeStyleDependentName(newItemPositionLabel.getText());
-		newItemPositionPanel.addStyleDependentName("1");
-		newItemPositionLabel.setText("1");
 	}
 
 	/**
@@ -399,8 +147,6 @@ public class ItemListPanel extends VerticalPanel{
 		itemsTable = new FlexTable();
 		showItems();
 		this.add(itemsTable);
-		this.setCellHorizontalAlignment(itemsTable, HasHorizontalAlignment.ALIGN_CENTER);
-		this.setCellVerticalAlignment(itemsTable, HasVerticalAlignment.ALIGN_MIDDLE);
 	}
 
 	/**
@@ -410,17 +156,13 @@ public class ItemListPanel extends VerticalPanel{
 		int nbItem = itemList.getItems()== null?0:itemList.getItems().size();
 
 		itemsTable.clear();
-		// TODO : Faire des objets de type Titre
-		itemsTable.setWidget(0, COL_NAME, new Label("TODO"));
-		itemsTable.getWidget(0, COL_NAME);
-		itemsTable.setWidget(0, COL_POSITION, new Label("POSITION"));
-		itemsTable.setWidget(0, COL_STATUS, new Label("STATUS"));
 		Item tempItem;
 
 		for (int i=0; i<nbItem; i++){
 			tempItem = itemList.getItems().get(i);
 			showItem(tempItem, i+1);
 		}
+		newItemPosition = nbItem+1;
 	}
 
 	/**
@@ -429,6 +171,8 @@ public class ItemListPanel extends VerticalPanel{
 	 * @param row la ligne où ajouter l'item
 	 */
 	private void showItem(Item item, final int row){
+
+		boolean status = item.getStatus()==1;
 
 		// Item Id
 		Hidden id = new Hidden ();
@@ -440,38 +184,15 @@ public class ItemListPanel extends VerticalPanel{
 		itemsTable.getWidget(row, COL_NAME).setStylePrimaryName("item_name");
 
 		// Item Position
-		String position = String.valueOf(item.getPosition());
-		FlowPanel positionPanel = new FlowPanel();
-		positionPanel.setStylePrimaryName("item_position");
-		positionPanel.addStyleDependentName(position);
-		Label positionLabel = new Label(position);
-		positionPanel.add(positionLabel);
-		itemsTable.setWidget(row, COL_POSITION, positionPanel);
-		
-		if (item.getStatus()==0){
-			positionLabel.addClickHandler(new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					Item rowItem = itemList.getItems().get(row-1);
-
-					int position = Integer.parseInt(((Label) event.getSource()).getText());
-					FlowPanel positionPanel = (FlowPanel) itemsTable.getWidget(row, COL_POSITION);
-					positionPanel.removeStyleDependentName(String.valueOf(position));
-					position = (position+1)%3;
-					positionPanel.addStyleDependentName(String.valueOf(position));
-					rowItem.setPosition(position);
-					httpUpdateItem(rowItem);
-				}
-			});
-		}else{
-			positionPanel.addStyleName("disabled");
-		}
+		itemsTable.setWidget(row, COL_POSITION, new Label(String.valueOf(item.getPosition())));
+		itemsTable.getWidget(row, COL_POSITION).setStylePrimaryName("item_position");
+		itemsTable.getWidget(row, COL_POSITION).setStyleDependentName("disable", status);
 
 		// Item Status
 		CheckBox statusCheckBox = new CheckBox();
-		statusCheckBox.setValue(item.getStatus()==1);
+		statusCheckBox.setValue(status);
 		itemsTable.setWidget(row, COL_STATUS, statusCheckBox);
-		itemsTable.getWidget(row, COL_NAME).addStyleDependentName(String.valueOf(item.getStatus()));
+		itemsTable.getWidget(row, COL_NAME).setStyleDependentName("disable", status);
 
 		statusCheckBox.addClickHandler(new ClickHandler() {
 			@Override
@@ -479,57 +200,129 @@ public class ItemListPanel extends VerticalPanel{
 				Item rowItem = itemList.getItems().get(row-1);
 				CheckBox statusCheckBox = (CheckBox)itemsTable.getWidget(row, COL_STATUS);
 				statusCheckBox.setEnabled(false);
-				int status = statusCheckBox.getValue()?1:0;
-				rowItem.setStatus(status);
-				itemsTable.getWidget(row, COL_NAME).addStyleDependentName(String.valueOf(rowItem.getStatus()));
-				itemsTable.getWidget(row, COL_POSITION).addStyleName("disabled");
+				boolean status = statusCheckBox.getValue();
+				rowItem.setStatus(status?1:0);
+				itemsTable.getWidget(row, COL_NAME).setStyleDependentName("disable", status);
+				itemsTable.getWidget(row, COL_POSITION).setStyleDependentName("disable", status);
 				httpUpdateItem(rowItem);
 				statusCheckBox.setEnabled(true);
 			}
 		});
+	}
 
-		
+	// REQUETAGE
+	/**
+	 * Récupère la liste depuis le service JSON
+	 * @param itemListId l'id de la liste à récupérer
+	 * @param itemListName le nom de la liste à récupérer pour vérifier que c'est bien la bonne
+	 */
+	private void httpGetList(String itemListId, final String itemListName) {
+		httpGetJson(YourListConst.JSON_URL_ITEMLIST+ itemListId + "/", new WizardRequestCallback() {
+			@Override
+			public void showResponse(Response response) {
+				if (response.getStatusCode() == Response.SC_OK) {
+					String itemListAsJSONString = response.getText();
+					JSONValue itemListAsJSONValue = JSONParser.parseStrict(itemListAsJSONString);
+					JSONObject itemListAsJSONObject = itemListAsJSONValue.isObject();
 
+					itemList = new ItemList();
+
+					// List Id
+					itemList.setId((long) itemListAsJSONObject.get("id").isNumber().doubleValue());
+
+					// List Name
+					itemList.setName(itemListAsJSONObject.get("name").isString().stringValue());
+					if (!itemListName.equals(itemList.getName())){
+						// TODO: error Handling ...
+						show404("List not found");
+						return;
+					}
+
+					Window.setTitle(itemList.getName()+" - "+YourListConst.PAGE_TITLE);
+
+					// Items
+					setItems(itemListAsJSONObject.get("items").isArray());
+
+					showItemListPanel();
+				}else{
+					showError("Erreur lors de la récupération de la liste");
+					logger.log(Level.SEVERE, response.getStatusCode()+" : "+response.getStatusText());
+				}
+
+			}
+		});
 	}
 
 	/**
-	 * Affiche un message d'erreur
-	 * @param message
+	 * Récupère les items de la liste depuis le service JSON
+	 * @param itemListId l'id de la liste à récupérer
 	 */
-	//TODO : centraliser la gestion d'erreur
-	private void showError(String message){
-		errorMessage = new Label(message);
-		errorMessage.setStylePrimaryName("serverResponseLabelError");
-		this.add(errorMessage);
+	private void httpGetItems() {
+		httpGetJson(YourListConst.JSON_URL_ITEMS.replace(YourListConst.JSON_VAR_LISTID, itemList.getId().toString()), new WizardRequestCallback() {
+			@Override
+			public void showResponse(Response response) {
+				if (response.getStatusCode() == Response.SC_OK) {
+					String itemsAsJSONString = response.getText();
+					JSONValue itemsAsJSONValue = JSONParser.parseStrict(itemsAsJSONString);
+
+					// Items
+					setItems(itemsAsJSONValue.isArray());
+
+					showItems();
+				}else{
+					showError("Erreur lors de la récupération des items");
+					logger.log(Level.SEVERE, response.getStatusCode()+" : "+response.getStatusText());
+				}
+			}
+		});
 	}
 
-	// TODO : a centraliser
-	private void showSpinner(Widget element) {
+	/**
+	 * Ajoute l'item via une requête JSON
+	 */
+	protected void httpAddItem(Item newItem) {
+		newItemNameTextBox.setEnabled(false);
+		httpPostJson(newItem.toJson(), YourListConst.JSON_URL_ITEM.replace(YourListConst.JSON_VAR_LISTID, itemList.getId().toString()), new WizardRequestCallback() {
+			@Override
+			public void showResponse(Response response) {
+				if (response.getStatusCode() == Response.SC_CREATED) {
+					// Clear the form
+					clearAddItemZone();
+					newItemNameTextBox.selectAll();
+					newItemNameTextBox.setFocus(true);
 
-		Image spinner = new Image("img/loading.gif");
-		spinner.setAltText("Loading...");
-		//int elementIndex = DOM.getChildIndex(this.getElement(), element.getElement());
-		this.insert(spinner, 6);
-		this.setCellHorizontalAlignment(spinner, HasHorizontalAlignment.ALIGN_RIGHT);
-		this.setCellVerticalAlignment(spinner, HasVerticalAlignment.ALIGN_MIDDLE);
-		this.remove(element);
-		// TODO : gérer un loader générique qui soit accessible par tous les controleurs
-		// TODO : revoir la gestion des spinner sur bouton
-		//			ButtonWithWait b = (ButtonWithWait) element;
-		//			b.startWaiting();
+					// Refresh the view
+					httpGetItems();
+				}else{
+					showError("Erreur lors de l'ajout de l'item");
+					logger.log(Level.SEVERE, response.getStatusCode()+" : "+response.getStatusText());
+				}
+				newItemNameTextBox.setEnabled(true);
+			}
+		});
 	}
-	
-	// JSON
 
-	private JSONObject buildJSONItem(Item item) {
-		JSONObject itemAsJSONObject = new JSONObject();
-		JSONValue itemNameJSONValue = new JSONString(item.getName());
-		itemAsJSONObject.put("name", itemNameJSONValue);
-		JSONValue itemPositionJSONValue = new JSONNumber(item.getPosition());
-		itemAsJSONObject.put("position", itemPositionJSONValue);
-		JSONValue itemStatusJSONValue = new JSONNumber(item.getStatus());
-		itemAsJSONObject.put("status", itemStatusJSONValue);
-		return itemAsJSONObject;
+	/**
+	 * Update l'item via une requête JSON
+	 */
+	protected void httpUpdateItem(Item item) {
+
+		httpPutJson(item.toJson(), YourListConst.JSON_URL_ITEM.replace(YourListConst.JSON_VAR_LISTID, itemList.getId().toString())+item.getId(), new WizardRequestCallback() {
+			@Override
+			public void showResponse(Response response) {
+				if (response.getStatusCode() == Response.SC_NO_CONTENT) {
+					// Clear the form
+					clearAddItemZone();
+
+					// Refresh the view
+					httpGetItems();
+				}else{
+					showError("Erreur lors de la mise à jour de l'item");
+					logger.log(Level.SEVERE, response.getStatusCode()+" : "+response.getStatusText());
+
+				}
+			}
+		});
 	}
 
 	// GETTERS 
@@ -539,9 +332,9 @@ public class ItemListPanel extends VerticalPanel{
 	}
 
 	public int getNewItemPosition(){
-		return Integer.parseInt(newItemPositionLabel.getText());
+		return newItemPosition;
 	}
-	
+
 	private void setItems(JSONArray itemsAsJSONArray){
 		JSONObject itemsAsJSONObject;
 		int nbItems = itemsAsJSONArray.size();
@@ -569,7 +362,24 @@ public class ItemListPanel extends VerticalPanel{
 				}
 			}
 		});
-		
+
 		itemList.setItems(items);
+	}
+
+	// UTILS 
+	private void addNewItem(){
+		if (!itemNameDefaultText.equals(getNewItemName())){
+			Item newItem = new Item();
+			// Name
+			newItem.setName(getNewItemName());
+
+			// Position
+			newItem.setPosition(getNewItemPosition());
+
+			// Status
+			newItem.setStatus(0);
+
+			httpAddItem(newItem);
+		}
 	}
 }

@@ -13,6 +13,8 @@
 
   <!-- Other module inherits                                      -->
   <inherits name="com.google.gwt.json.JSON" /> 
+  <inherits name="com.google.gwt.logging.Logging"/>
+  <set-property name="gwt.logging.logLevel" value="FINEST"/> 
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='hiks.yourlists.client.YourLists'/>

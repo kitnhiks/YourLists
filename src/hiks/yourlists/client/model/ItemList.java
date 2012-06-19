@@ -2,6 +2,10 @@ package hiks.yourlists.client.model;
 
 import java.util.List;
 
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
+
 public class ItemList {
 
 	    private Long id;
@@ -58,5 +62,16 @@ public class ItemList {
 		 */
 		public void setItems(List<Item> items) {
 			this.items = items;
+		}
+		
+		// JSON
+		/**
+		 * @return la représentation Json de la liste
+		 */
+		public JSONObject toJson() {
+			JSONObject itemListAsJSONObject = new JSONObject();
+			JSONValue itemListNameJSONValue = new JSONString(this.getName());
+			itemListAsJSONObject.put("name", itemListNameJSONValue);
+			return itemListAsJSONObject;
 		}
 }

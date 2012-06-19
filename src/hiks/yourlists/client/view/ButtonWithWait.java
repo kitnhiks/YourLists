@@ -4,27 +4,23 @@ import com.google.gwt.user.client.ui.Button;
 
 public class ButtonWithWait extends Button{
 
-	private String savedText;
+	private Spinner spinner;
 	
 	public ButtonWithWait(){
-		super();
+		this("");
 	}
 	
 	public ButtonWithWait(String html){
 		super(html);
+		spinner = new Spinner(this);
+		
 	}
 	
 	public void startWaiting(){
-		savedText = this.getText();
-		this.setText("");
-		this.setEnabled(false);
-		this.addStyleName("wait");
+		spinner.startSpinner();
 	}
 	
 	public void stopWaiting(){
-		savedText = null;
-		this.setText(savedText);
-		this.setEnabled(true);
-		this.removeStyleName("wait");
+		spinner.stopSpinner();
 	}
 }

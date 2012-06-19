@@ -67,8 +67,7 @@ public class ItemListRESTService {
 	public List<Item> getItems(@PathParam("id") Long id) {
 		PersistenceManager pm = RESTService.pmfInstance.getPersistenceManager();
 		ItemList itemList = pm.getObjectById(ItemList.class, id);
-		// TODO : 
-		return null;
+		return itemList.getItems();
 	}
 	
 	@POST

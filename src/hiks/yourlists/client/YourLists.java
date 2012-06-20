@@ -16,19 +16,23 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import hiks.yourlists.client.view.ItemListCreationPanel;
 import hiks.yourlists.client.view.ItemListPanel;
-import hiks.yourlists.shared.YourListConst;
+import hiks.yourlists.client.view.Spinner;
+import hiks.yourlists.shared.Const;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class YourLists implements EntryPoint, ValueChangeHandler<String> {
 
+	private Spinner spinner;
 	private VerticalPanel wizardPanel;
 	protected Logger logger = Logger.getLogger("YourListsLogger");
 
 	public void onModuleLoad() {
 		logger.log(Level.FINEST, "Ouverture de la page...");
-		Window.setTitle(YourListConst.PAGE_TITLE);
+		spinner = new Spinner(RootPanel.get("wizard"));
+		spinner.startSpinner();
+		Window.setTitle(Const.PAGE_TITLE);
 		// Add history listener
 		History.addValueChangeHandler(this);
 		History.fireCurrentHistoryState();
@@ -48,10 +52,7 @@ public class YourLists implements EntryPoint, ValueChangeHandler<String> {
 			wizardPanel = new ItemListCreationPanel();
 		}
 		// On vire le loader
-		if (DOM.getElementById("loading")!=null){ 
-			// TODO : gérer un loader générique qui soit accessible par tous les controleurs
-			DOM.removeChild(DOM.getElementById("content"), DOM.getElementById("loading"));
-		}
+		spinner.stopSpinner();
 		// On ajoute le panel dans la page
 		RootPanel.get("wizard").clear();
 		RootPanel.get("wizard").add(wizardPanel);

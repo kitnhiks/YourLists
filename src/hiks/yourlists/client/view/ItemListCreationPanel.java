@@ -5,7 +5,7 @@ import java.util.logging.Level;
 
 import hiks.yourlists.client.model.ItemList;
 import hiks.yourlists.client.view.WizardPanel.WizardRequestCallback;
-import hiks.yourlists.shared.YourListConst;
+import hiks.yourlists.shared.Const;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -35,7 +35,7 @@ public class ItemListCreationPanel extends WizardPanel{
 
 	public ItemListCreationPanel(){
 		logger.log(Level.FINEST, "Chargement du panel de création...");
-		Window.setTitle(YourListConst.PAGE_TITLE);
+		Window.setTitle(Const.PAGE_TITLE);
 		showItemListCreationPanel();
 		logger.log(Level.FINEST, "Panel de création chargé");
 	}
@@ -79,7 +79,7 @@ public class ItemListCreationPanel extends WizardPanel{
 		itemListNameTextBox.setEnabled(false);
 		ItemList itemList = new ItemList();
 		itemList.setName(itemListNameTextBox.getText());
-		httpPostJson(itemList.toJson(), YourListConst.JSON_URL_ITEMLIST, new WizardRequestCallback() {
+		httpPostJson(itemList.toJson(), Const.JSON_URL_ITEMLIST, new WizardRequestCallback() {
 			@Override
 			public void showResponse(Response response) {
 					if (response.getStatusCode() == Response.SC_CREATED) {

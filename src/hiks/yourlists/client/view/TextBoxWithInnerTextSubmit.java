@@ -42,9 +42,7 @@ public abstract class TextBoxWithInnerTextSubmit extends TextBoxWithInnerText{
 	}
 
 	protected void handleSubmit(){
-		this.setEnabled(false);
 		onSubmit();
-		this.setEnabled(true);
 	}
 	
 	@Override

@@ -47,7 +47,6 @@ input.error{
 	height: 16px;
 	width: 16px;
 	margin: auto;
-	cursor: pointer;
 }
 
 .item_position-disable {
@@ -57,18 +56,24 @@ input.error{
 
 .item_name {
 	font-weight: bold;
+	cursor: pointer;
 }
 
 .item_name-disable {
 	font-weight: normal;
 	text-decoration: line-through;
 	color: #CCCCCC;
+	cursor: default;
 }
 
 .wait {
 	background: url("img/loading.gif") no-repeat;
 	width: 24px;
 	height: 24px;
+}
+
+.hidden{
+	display:none;
 }
 
 .sendButton {

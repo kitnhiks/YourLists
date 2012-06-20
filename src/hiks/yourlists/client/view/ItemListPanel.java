@@ -8,10 +8,16 @@ import java.util.logging.Level;
 
 import hiks.yourlists.client.model.Item;
 import hiks.yourlists.client.model.ItemList;
-import hiks.yourlists.shared.YourListConst;
+import hiks.yourlists.client.model.Sharer;
+import hiks.yourlists.shared.Const;
 
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -30,7 +36,8 @@ import com.google.gwt.user.client.ui.Hidden;
 public class ItemListPanel extends WizardPanel{
 
 	private final int COL_ID = 0;
-	private final int COL_NAME = 1;
+	private final int COL_NAME_HIDDEN = 5;
+	private final int COL_NAME = 4;
 	private final int COL_POSITION = 2;
 	private final int COL_STATUS = 3;
 	private final int FILTER_UP = 0;
@@ -99,6 +106,21 @@ public class ItemListPanel extends WizardPanel{
 		// TODO : Ajouter le style du bouton
 		// TODO : ajouter les index de tabulation
 		this.add(backToCreateListButton);
+		
+		// Le bouton de partage de la liste
+		Button shareListButton = new Button("Share");
+		shareListButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				// TODO : virer les mails de test et faire l'input dans une popup
+				ArrayList<String> mails = new ArrayList<String>();
+				mails.add("zibist@hotmail.fr");
+				shareList(mails);
+			}
+		});
+		// TODO : Ajouter le style du bouton
+		// TODO : ajouter les index de tabulation
+		this.add(shareListButton);
 
 	}
 
@@ -116,19 +138,6 @@ public class ItemListPanel extends WizardPanel{
 			}
 		};
 		newItemPanel.add(newItemNameTextBox);
-
-		// Position
-
-		// Bouton pour ajouter l'item
-		// TODO : remove bouton
-		//		createNewItemButton = new Button("Add");
-		//		createNewItemButton.addClickHandler(new ClickHandler(){
-		//			@Override
-		//			public void onClick(ClickEvent event) {
-		//				addNewItem();
-		//			}
-		//		});
-		//		newItemPanel.add(createNewItemButton);
 
 		this.add(newItemPanel);
 	}
@@ -163,6 +172,8 @@ public class ItemListPanel extends WizardPanel{
 			showItem(tempItem, i+1);
 		}
 		newItemPosition = nbItem+1;
+		newItemNameTextBox.selectAll();
+		newItemNameTextBox.setFocus(true);
 	}
 
 	/**
@@ -179,9 +190,63 @@ public class ItemListPanel extends WizardPanel{
 		id.setValue(String.valueOf(item.getId()));
 		itemsTable.setWidget(row, COL_ID, id);
 
-		// Item Name 
-		itemsTable.setWidget(row, COL_NAME, new Label(item.getName()));
+		// Item Name
+		final Label nameLabel = new Label(item.getName());
+		itemsTable.setWidget(row, COL_NAME, nameLabel);
 		itemsTable.getWidget(row, COL_NAME).setStylePrimaryName("item_name");
+		// TODO : revoir avec l'affichage du label et du textbox et la css display none
+		nameLabel.addClickHandler(new ClickHandler(){ // TODO : faire une classe avec ce truc là
+			TextBox nameInput;
+
+			@Override
+			public void onClick(ClickEvent event) {
+				nameInput = new TextBox();
+				nameInput.setText(getItemDefaultName(row));
+
+				nameInput.addBlurHandler(new BlurHandler(){
+					@Override
+					public void onBlur(BlurEvent event) {
+						handleOnBlur();
+					}
+				});
+				nameInput.addKeyDownHandler(new KeyDownHandler(){
+					@Override
+					public void onKeyDown(KeyDownEvent event) {
+						handleKeyDown(event);
+					}
+				});
+
+				itemsTable.setWidget(row, COL_NAME, nameInput);
+				nameInput.setFocus(true);
+			}
+
+			private void handleKeyDown(KeyDownEvent event){
+				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER){
+					onSubmit();
+				}
+			}
+
+			private void handleOnBlur(){
+				onSubmit();
+			}
+
+			private void onSubmit() {
+				if ("".equals(nameInput.getText())){
+					// TODO : delete item
+				}
+				if (!getItemDefaultName(row).equals(nameInput.getText())){
+					updateItem(row);
+				}
+				nameLabel.setText(nameInput.getText());
+				itemsTable.setWidget(row, COL_NAME, nameLabel);
+			}
+
+		});
+
+		// Item saved name
+		Hidden nameHidden = new Hidden ();
+		nameHidden.setValue(item.getName());
+		itemsTable.setWidget(row, COL_NAME_HIDDEN, nameHidden);
 
 		// Item Position
 		itemsTable.setWidget(row, COL_POSITION, new Label(String.valueOf(item.getPosition())));
@@ -217,7 +282,7 @@ public class ItemListPanel extends WizardPanel{
 	 * @param itemListName le nom de la liste à récupérer pour vérifier que c'est bien la bonne
 	 */
 	private void httpGetList(String itemListId, final String itemListName) {
-		httpGetJson(YourListConst.JSON_URL_ITEMLIST+ itemListId + "/", new WizardRequestCallback() {
+		httpGetJson(Const.JSON_URL_ITEMLIST+ itemListId + "/", new WizardRequestCallback() {
 			@Override
 			public void showResponse(Response response) {
 				if (response.getStatusCode() == Response.SC_OK) {
@@ -238,7 +303,7 @@ public class ItemListPanel extends WizardPanel{
 						return;
 					}
 
-					Window.setTitle(itemList.getName()+" - "+YourListConst.PAGE_TITLE);
+					Window.setTitle(itemList.getName()+" - "+Const.PAGE_TITLE);
 
 					// Items
 					setItems(itemListAsJSONObject.get("items").isArray());
@@ -258,7 +323,7 @@ public class ItemListPanel extends WizardPanel{
 	 * @param itemListId l'id de la liste à récupérer
 	 */
 	private void httpGetItems() {
-		httpGetJson(YourListConst.JSON_URL_ITEMS.replace(YourListConst.JSON_VAR_LISTID, itemList.getId().toString()), new WizardRequestCallback() {
+		httpGetJson(Const.JSON_URL_ITEMS.replace(Const.JSON_VAR_LISTID, itemList.getId().toString()), new WizardRequestCallback() {
 			@Override
 			public void showResponse(Response response) {
 				if (response.getStatusCode() == Response.SC_OK) {
@@ -269,6 +334,8 @@ public class ItemListPanel extends WizardPanel{
 					setItems(itemsAsJSONValue.isArray());
 
 					showItems();
+
+
 				}else{
 					showError("Erreur lors de la récupération des items");
 					logger.log(Level.SEVERE, response.getStatusCode()+" : "+response.getStatusText());
@@ -282,7 +349,7 @@ public class ItemListPanel extends WizardPanel{
 	 */
 	protected void httpAddItem(Item newItem) {
 		newItemNameTextBox.setEnabled(false);
-		httpPostJson(newItem.toJson(), YourListConst.JSON_URL_ITEM.replace(YourListConst.JSON_VAR_LISTID, itemList.getId().toString()), new WizardRequestCallback() {
+		httpPostJson(newItem.toJson(), Const.JSON_URL_ITEM.replace(Const.JSON_VAR_LISTID, itemList.getId().toString()), new WizardRequestCallback() {
 			@Override
 			public void showResponse(Response response) {
 				if (response.getStatusCode() == Response.SC_CREATED) {
@@ -307,7 +374,7 @@ public class ItemListPanel extends WizardPanel{
 	 */
 	protected void httpUpdateItem(Item item) {
 
-		httpPutJson(item.toJson(), YourListConst.JSON_URL_ITEM.replace(YourListConst.JSON_VAR_LISTID, itemList.getId().toString())+item.getId(), new WizardRequestCallback() {
+		httpPutJson(item.toJson(), Const.JSON_URL_ITEM.replace(Const.JSON_VAR_LISTID, itemList.getId().toString())+item.getId(), new WizardRequestCallback() {
 			@Override
 			public void showResponse(Response response) {
 				if (response.getStatusCode() == Response.SC_NO_CONTENT) {
@@ -323,6 +390,26 @@ public class ItemListPanel extends WizardPanel{
 				}
 			}
 		});
+	}
+	
+	/**
+	 * Déclenche un partage par mail
+	 * @param sharer
+	 */
+	protected void httpShareList(Sharer sharer) {
+		httpPostJson(sharer.toJson(), Const.JSON_URL_ITEMLIST+itemList.getId()+"/share", new WizardRequestCallback() {
+			@Override
+			public void showResponse(Response response) {
+				if (response.getStatusCode() == Response.SC_OK) {
+					showMessage("Mail envoyé");
+				}else{
+					showError("Erreur lors de l'envoie du partage");
+					logger.log(Level.SEVERE, response.getStatusCode()+" : "+response.getStatusText());
+
+				}
+			}
+		});
+		
 	}
 
 	// GETTERS 
@@ -366,6 +453,26 @@ public class ItemListPanel extends WizardPanel{
 		itemList.setItems(items);
 	}
 
+	public Long getItemId(int row){
+		return Long.valueOf(((Hidden)itemsTable.getWidget(row, COL_ID)).getValue());
+	}
+
+	public String getItemName(int row){
+		return ((TextBox)itemsTable.getWidget(row, COL_NAME)).getText();
+	}
+
+	public String getItemDefaultName(int row){
+		return ((Hidden)itemsTable.getWidget(row, COL_NAME_HIDDEN)).getValue();
+	}
+
+	public int getItemPosition(int row){
+		return Integer.valueOf(((Label)itemsTable.getWidget(row, COL_POSITION)).getText());
+	}
+
+	public int getItemStatus(int row){
+		return ((CheckBox)itemsTable.getWidget(row, COL_STATUS)).getValue()?1:0;
+	}
+
 	// UTILS 
 	private void addNewItem(){
 		if (!itemNameDefaultText.equals(getNewItemName())){
@@ -382,4 +489,33 @@ public class ItemListPanel extends WizardPanel{
 			httpAddItem(newItem);
 		}
 	}
+
+	private void updateItem(int row){
+		if (!getItemDefaultName(row).equals(getNewItemName())){
+			Item newItem = new Item();
+			// Id
+			newItem.setId(getItemId(row));
+
+			// Name
+			newItem.setName(getItemName(row));
+
+			// Position
+			newItem.setPosition(getItemPosition(row));
+
+			// Status
+			newItem.setStatus(getItemStatus(row));
+
+			httpUpdateItem(newItem);
+		}
+	}
+
+	private void shareList(ArrayList<String> mails){
+		Sharer sharer = new Sharer ();
+		sharer.setSubject(Const.SHARE_MAIL_SUBJECT.replace(Const.SHARE_VAR_LIST_NAME, itemList.getName()));
+		sharer.setBody(Const.SHARE_MAIL_BODY);
+		sharer.setMails(mails);
+		sharer.setUrl(Window.Location.getHref());
+		httpShareList(sharer);
+	}
+
 }

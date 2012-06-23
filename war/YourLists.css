@@ -1,4 +1,4 @@
-/** Add css rules here for your application. */
+/** Generics */
 body {
 	background: none repeat scroll 0 0 #FFFFFF;
 	font-family: arial;
@@ -7,7 +7,7 @@ body {
 }
 
 h1 {
-	margin: 0;
+	text-align: center;
 }
 
 a {
@@ -24,25 +24,94 @@ a img {
 	border: none;
 }
 
+/**  Header */
+
 #header {
 	border-bottom: 1px solid #CCCCCC;
 	margin: 20px;
 }
 
+#header img{
+	margin : auto;
+}
+
+
+/** Footer */
+
 #footer-content {
 	border-top: 1px solid #CCCCCC;
 	margin: 20px;
-	text-align: right;
+	text-align: center;
+	font-size: 9px;
 }
+
+/** Content */
 
 #content {
 	margin: 0;
 }
 
+/** Wizard */
+
+/** List Creation Panel */
+
+#itemListCreationPanel{
+	margin : auto;
+	width : 200px;
+}
+
+#itemListNameTextBoxPanel{
+	text-align: center;
+}
+
+#itemListNameTextBox{
+	margin : 5px 0px;
+}
+
+#createListButtonPanel{
+	width: 30%;
+	margin : auto;
+}
+
+/** List Panel */
+
+#itemListPanel{
+	margin : auto;
+	width : 200px;
+}
+
+
+/** Items */
+
 input.error{
 	border-color: red;
 }
 
+#newItemNameTextBox{
+	width : 190px;
+}
+
+#itemsTable{
+	width : 100%;
+}
+
+.itemsTable-row:hover{
+	background-color : #CCCCCC;
+} 
+
+/* Item Name */ 
+.item_name {
+	cursor: text;
+}
+
+.item_name-disable {
+	font-weight: normal;
+	text-decoration: line-through;
+	color: #CCCCCC;
+	cursor: default;
+}
+
+/* Item Position */
 .item_position {
 	height: 16px;
 	width: 16px;
@@ -54,37 +123,18 @@ input.error{
 	color: #CCCCCC;
 }
 
-.item_name {
-	font-weight: bold;
-	cursor: pointer;
-}
-
-.item_name-disable {
-	font-weight: normal;
-	text-decoration: line-through;
-	color: #CCCCCC;
-	cursor: default;
-}
-
-.wait {
-	background: url("img/loading.gif") no-repeat;
-	width: 24px;
-	height: 24px;
-}
+/** properties */ 
 
 .hidden{
 	display:none;
-}
-
-.sendButton {
-	display: block;
-	font-size: 16pt;
 }
 
 .disabled {
 	filter:alpha(opacity=30);
 	opacity:0.3;
 }
+
+/** User FeedBack */
 
 #errorLabel {
 	color: red;
@@ -103,5 +153,5 @@ input.error{
 	bottom:0px;
 	filter:alpha(opacity=60);
 	opacity:0.6;
-	background-color:#000;
+	background: url("img/loading.gif") no-repeat center;
 }

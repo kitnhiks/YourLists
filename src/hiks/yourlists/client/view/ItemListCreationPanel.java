@@ -1,41 +1,32 @@
 package hiks.yourlists.client.view;
 
-import java.util.Date;
 import java.util.logging.Level;
 
 import hiks.yourlists.client.model.ItemList;
-import hiks.yourlists.client.view.WizardPanel.WizardRequestCallback;
 import hiks.yourlists.shared.Const;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ItemListCreationPanel extends WizardPanel{
 
 	private final String itemListNameDefaultText = "Your list name...";
-	private HorizontalPanel itemListNamePanel;
 	private TextBox itemListNameTextBox;
 	private Label errorMessage;
 	private ButtonWithWait createListButton;
 
 	public ItemListCreationPanel(){
+		super();
 		logger.log(Level.FINEST, "Chargement du panel de création...");
 		Window.setTitle(Const.PAGE_TITLE);
+		this.getElement().setId("itemListCreationPanel");
 		showItemListCreationPanel();
 		logger.log(Level.FINEST, "Panel de création chargé");
 	}
@@ -44,17 +35,20 @@ public class ItemListCreationPanel extends WizardPanel{
 	public void showItemListCreationPanel(){
 		
 		// Le champ du nom de la liste
-		itemListNamePanel = new HorizontalPanel();
+		FlowPanel itemListNameTextBoxPanel = new FlowPanel();
 		itemListNameTextBox = new TextBoxWithInnerTextSubmit(itemListNameDefaultText, false){
 			@Override
 			protected void onSubmit(){
 				addNewList();
 			}
 		};
-		itemListNamePanel.add(itemListNameTextBox);
-		this.add(itemListNamePanel);
+		itemListNameTextBox.getElement().setId("itemListNameTextBox");
+		itemListNameTextBoxPanel.add(itemListNameTextBox);
+		itemListNameTextBoxPanel.getElement().setId("itemListNameTextBoxPanel");
+		this.add(itemListNameTextBoxPanel);
 
 		// Le bouton de création de la liste
+		FlowPanel createListButtonPanel = new FlowPanel();
 		createListButton = new ButtonWithWait("Create");
 		createListButton.addClickHandler(new ClickHandler() {
 			@Override
@@ -62,9 +56,10 @@ public class ItemListCreationPanel extends WizardPanel{
 				addNewList();
 			}
 		});
-		// TODO : Ajouter le style du bouton
-		// TODO : ajouter les index de tabulation
-		this.add(createListButton);
+		createListButton.getElement().setId("createListButton");
+		createListButtonPanel.add(createListButton);
+		createListButtonPanel.getElement().setId("createListButtonPanel");
+		this.add(createListButtonPanel);
 	}
 	
 	@Override

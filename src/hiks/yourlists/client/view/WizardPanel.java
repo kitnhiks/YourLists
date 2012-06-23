@@ -11,10 +11,10 @@ import com.google.gwt.http.client.RequestBuilder.Method;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class WizardPanel extends VerticalPanel{
+public class WizardPanel extends FlowPanel{
 	
 	protected Logger logger = Logger.getLogger("YourListsLogger");
 	protected Spinner spinner;

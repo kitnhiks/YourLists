@@ -11,6 +11,7 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -25,7 +26,7 @@ import hiks.yourlists.shared.Const;
 public class YourLists implements EntryPoint, ValueChangeHandler<String> {
 
 	private Spinner spinner;
-	private VerticalPanel wizardPanel;
+	private Panel wizardPanel;
 	protected Logger logger = Logger.getLogger("YourListsLogger");
 
 	public void onModuleLoad() {

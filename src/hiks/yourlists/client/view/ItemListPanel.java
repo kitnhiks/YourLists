@@ -18,6 +18,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -28,7 +29,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Hidden;
@@ -38,8 +38,8 @@ public class ItemListPanel extends WizardPanel{
 	private final int COL_ID = 0;
 	private final int COL_NAME_HIDDEN = 5;
 	private final int COL_NAME = 4;
-	private final int COL_POSITION = 2;
-	private final int COL_STATUS = 3;
+	private final int COL_POSITION = 3;
+	private final int COL_STATUS = 2;
 	private final int FILTER_UP = 0;
 	private final int FILTER_DOWN = 1;
 
@@ -53,7 +53,6 @@ public class ItemListPanel extends WizardPanel{
 	private Label itemListNameLabel;
 	private FlexTable itemsTable;
 	private Label errorMessage;
-	private HorizontalPanel newItemPanel;
 	private TextBox newItemNameTextBox;
 	private Button createNewItemButton;
 
@@ -61,6 +60,7 @@ public class ItemListPanel extends WizardPanel{
 
 	public ItemListPanel(String itemListId, String itemListName){
 		super();
+		this.getElement().setId("itemListPanel");
 		// Récupérer la liste
 		httpGetList (itemListId, itemListName);
 	}
@@ -128,8 +128,6 @@ public class ItemListPanel extends WizardPanel{
 	 * Affiche la zone pour ajouter un item
 	 */
 	private void showAddItemZone() {
-		newItemPanel = new HorizontalPanel();
-
 		// Name
 		newItemNameTextBox = new TextBoxWithInnerTextSubmit(itemNameDefaultText, true){
 			@Override
@@ -137,9 +135,8 @@ public class ItemListPanel extends WizardPanel{
 				addNewItem();
 			}
 		};
-		newItemPanel.add(newItemNameTextBox);
-
-		this.add(newItemPanel);
+		newItemNameTextBox.getElement().setId("newItemNameTextBox");
+		this.add(newItemNameTextBox);
 	}
 
 	/**
@@ -153,7 +150,12 @@ public class ItemListPanel extends WizardPanel{
 	 * Affiche la zone des items
 	 */
 	private void showItemsTable(){
+		// TODO : Replace FlexTable (GridTable ?) ou carrément des FlowPanel (comment récupérer les items ?)
 		itemsTable = new FlexTable();
+		itemsTable.setBorderWidth(0);
+		itemsTable.setCellPadding(0);
+		itemsTable.setCellSpacing(0);
+		itemsTable.getElement().setId("itemsTable");
 		showItems();
 		this.add(itemsTable);
 	}
@@ -184,7 +186,7 @@ public class ItemListPanel extends WizardPanel{
 	private void showItem(Item item, final int row){
 
 		boolean status = item.getStatus()==1;
-
+		
 		// Item Id
 		Hidden id = new Hidden ();
 		id.setValue(String.valueOf(item.getId()));
@@ -258,6 +260,7 @@ public class ItemListPanel extends WizardPanel{
 		statusCheckBox.setValue(status);
 		itemsTable.setWidget(row, COL_STATUS, statusCheckBox);
 		itemsTable.getWidget(row, COL_NAME).setStyleDependentName("disable", status);
+		//statusCheckBox.addStyleName("hidden");
 
 		statusCheckBox.addClickHandler(new ClickHandler() {
 			@Override
@@ -273,6 +276,9 @@ public class ItemListPanel extends WizardPanel{
 				statusCheckBox.setEnabled(true);
 			}
 		});
+		
+		itemsTable.getRowFormatter().addStyleName(row,"itemsTable-row");
+		itemsTable.getRowFormatter().getElement(row);
 	}
 
 	// REQUETAGE

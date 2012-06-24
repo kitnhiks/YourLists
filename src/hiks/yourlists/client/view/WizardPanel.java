@@ -42,7 +42,7 @@ public class WizardPanel extends FlowPanel{
 	}
 	
 	/**
-	 * Lance une requête http GET
+	 * Lance une requête http GET pour récupérer du JSON
 	 * @param url
 	 * @param callback
 	 */
@@ -51,7 +51,7 @@ public class WizardPanel extends FlowPanel{
 	}
 	
 	/**
-	 * Lance une requête http POST pour récupérer du JSON
+	 * Lance une requête http POST pour envoyer du JSON
 	 * @param jsonObject les données à poster au format JSON
 	 * @param url
 	 * @param callback
@@ -61,13 +61,22 @@ public class WizardPanel extends FlowPanel{
 	}
 
 	/**
-	 * Lance une requête http PUT pour récupérer du JSON
+	 * Lance une requête http PUT pour envoyer du JSON
 	 * @param jsonObject les données à mettre à jour au format JSON
 	 * @param url
 	 * @param callback
 	 */
 	protected void httpPutJson(JSONObject jsonObject, String url, WizardRequestCallback callback) {
 		httpRequestJson(RequestBuilder.PUT, jsonObject, url, callback);
+	}
+	
+	/**
+	 * Lance une requête http DELETE
+	 * @param url
+	 * @param callback
+	 */
+	protected void httpDeleteJson(String url, WizardRequestCallback callback) {
+		httpRequestJson(RequestBuilder.DELETE, null, url, callback);
 	}
 
 	// AFFICHAGE

@@ -4,22 +4,22 @@ import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.TextArea;
 
 /**
- * Une classe pour faire des champs texte avec un texte par défaut qui disparait quand on click
+ * Une classe pour faire des champs texte area avec un texte par défaut qui disparait quand on click
  * @author xavier.renaudin
  *
  */
-public class TextBoxWithInnerText extends TextBox{
+public class TextAreaWithInnerText extends TextArea{
 
 	protected String defaultText;
 	
 	/**
-	 * Crée un champ texte avec un texte par défaut qui disparait quand on click
+	 * Crée un champ texte area avec un texte par défaut qui disparait quand on click
 	 * @param defaultText
 	 */
-	public TextBoxWithInnerText (final String defaultText){
+	public TextAreaWithInnerText (final String defaultText){
 		super();
 		this.defaultText = defaultText==null?"":defaultText;
 		

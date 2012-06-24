@@ -14,8 +14,9 @@
   <!-- Other module inherits                                      -->
   <inherits name="com.google.gwt.json.JSON" /> 
   <inherits name="com.google.gwt.logging.Logging"/>
-  <set-property name="gwt.logging.logLevel" value="FINEST"/>
-  <set-property name="gwt.logging.consoleHandler" value="DISABLED"/> 
+  <set-property name="gwt.logging.logLevel" value="SEVERE"/>
+  <set-property name="gwt.logging.consoleHandler" value="ENABLED"/>
+  <set-property name="gwt.logging.popupHandler" value="DISABLED"/>
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='hiks.yourlists.client.YourLists'/>

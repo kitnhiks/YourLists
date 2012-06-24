@@ -88,7 +88,7 @@ input.error{
 }
 
 #newItemNameTextBox{
-	width : 190px;
+	width : 231px;
 }
 
 #itemsTable{
@@ -104,6 +104,16 @@ input.error{
 	cursor: text;
 }
 
+.item_name .gwt-Label{
+	width: 200px;
+	height: 26px;
+	margin: 8px auto auto 6px;
+}
+
+.item_name .gwt-TextBox{
+	width: 195px;
+}
+
 .item_name-disable {
 	font-weight: normal;
 	text-decoration: line-through;
@@ -113,9 +123,10 @@ input.error{
 
 /* Item Position */
 .item_position {
-	height: 16px;
-	width: 16px;
-	margin: auto;
+	height: 18px;
+	width: 10px;
+	margin-left: 5px;
+	cursor: default;
 }
 
 .item_position-disable {
@@ -123,11 +134,17 @@ input.error{
 	color: #CCCCCC;
 }
 
-/** properties */ 
+/** Share Popup */
 
-.hidden{
-	display:none;
+.sharePopup div{
+	text-align : center;
 }
+
+.mailsTextArea{
+	width : 200px;
+}
+
+/** properties */ 
 
 .disabled {
 	filter:alpha(opacity=30);

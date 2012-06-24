@@ -15,5 +15,5 @@ public class Const {
 	public static final String SHARE_MAIL_SUBJECT = "La liste "+SHARE_VAR_LIST_NAME;
 	public static final String SHARE_MAIL_BODY = "Bonjour,\nOn vous a envoyé une liste";
 	public static final String SHARE_MAIL_FROM = "kitnhiks@gmail.com";
-	public static final String SHARE_MAIL_NAME = "Kit'N Hiks";	
+	public static final String SHARE_MAIL_NAME = "Kit'N Hiks";
 }

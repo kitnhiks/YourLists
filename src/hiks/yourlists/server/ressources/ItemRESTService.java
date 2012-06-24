@@ -105,8 +105,30 @@ public class ItemRESTService {
 	@DELETE
 	@Path("{id}")
 	@Produces("application/json")
-	public void deleteItem(@PathParam("id") Long id) {
+	public void deleteItem(@PathParam("listId") Long listId, @PathParam("id") Long id) {
 		PersistenceManager pm = RESTService.pmfInstance.getPersistenceManager();
-		pm.deletePersistent(pm.getObjectById(Item.class, KeyFactory.createKey(Item.class.getSimpleName(), id)));
+		Transaction tx = pm.currentTransaction();
+		try {
+			tx.begin();
+			ItemList parentList = pm.getObjectById(ItemList.class, listId);
+			List<Item> items = parentList.getItems();
+			int nbItem = items.size();
+			Item itemToDelete = parentList.getItem(id);
+			Item tempItem;
+			int position = itemToDelete.getPosition();
+			for (int i = 0; i<nbItem; i++){
+				tempItem = items.get(i);
+				if (tempItem.getPosition()>position){
+					tempItem.setPosition(tempItem.getPosition()-1);
+				}
+			}
+			pm.deletePersistent(itemToDelete);
+			tx.commit();
+		} finally {
+			if (tx.isActive()) {
+				tx.rollback();
+			}
+			pm.close();
+		}
 	}
 }

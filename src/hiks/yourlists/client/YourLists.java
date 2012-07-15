@@ -1,6 +1,5 @@
 package hiks.yourlists.client;
 
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -8,12 +7,10 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 import hiks.yourlists.client.view.ItemListCreationPanel;
 import hiks.yourlists.client.view.ItemListPanel;
@@ -31,7 +28,7 @@ public class YourLists implements EntryPoint, ValueChangeHandler<String> {
 
 	public void onModuleLoad() {
 		logger.log(Level.FINEST, "Ouverture de la page...");
-		spinner = new Spinner(RootPanel.get("wizard"));
+		spinner = new Spinner(RootPanel.get("w"));
 		spinner.startSpinner();
 		Window.setTitle(Const.PAGE_TITLE);
 		// Add history listener
@@ -55,7 +52,7 @@ public class YourLists implements EntryPoint, ValueChangeHandler<String> {
 		// On vire le loader
 		spinner.stopSpinner();
 		// On ajoute le panel dans la page
-		RootPanel.get("wizard").clear();
-		RootPanel.get("wizard").add(wizardPanel);
+		RootPanel.get("w").clear();
+		RootPanel.get("w").add(wizardPanel);
 	}
 }

@@ -22,7 +22,9 @@ public class WizardPanel extends FlowPanel{
 
 	public WizardPanel(){
 		spinner = new Spinner(this);
+		spinner.startSpinner();
 		showWizardPanel();
+		spinner.stopSpinner();
 	}
 
 	// REQUETAGE

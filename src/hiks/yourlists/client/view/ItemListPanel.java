@@ -24,7 +24,10 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Hidden;
 
@@ -46,9 +49,7 @@ public class ItemListPanel extends WizardPanel{
 
 	private Label itemListNameLabel;
 	private FlexTable itemsTable;
-	private Label errorMessage;
 	private TextBox newItemNameTextBox;
-	private Button createNewItemButton;
 
 	private final String itemNameDefaultText = "Your item name...";
 
@@ -68,51 +69,64 @@ public class ItemListPanel extends WizardPanel{
 	private void showItemListPanel() {
 		// Le champ du nom de la liste
 		itemListNameLabel = new Label(itemList.getName());
+		itemListNameLabel.getElement().setId("itemListNameLabel");
 		this.add(itemListNameLabel);
 
 		// La zone pour ajouter un item
 		showAddItemZone();
 
-
 		// Les éléments de la liste
 		showItemsTable();
 
-		// Le bouton de refresh de la liste
-		Button refreshListButton = new Button("Refresh");
-		refreshListButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				httpGetItems();
-			}
-		});
-		// TODO : Ajouter le style du bouton
-		// TODO : ajouter les index de tabulation
-		this.add(refreshListButton);
+		// Le menu avec les boutons 
+		showMenu();
+	}
 
-		// Le bouton de retour à la création d'une liste
-		Button backToCreateListButton = new Button("Create a new list");
-		backToCreateListButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				History.newItem("");
-			}
-		});
-		// TODO : Ajouter le style du bouton
-		// TODO : ajouter les index de tabulation
-		this.add(backToCreateListButton);
+	/**
+	 * Affiche le Panel contenant le menu avec les boutons
+	 * TODO : sortir dans une classe à part
+	 */
+	private void showMenu(){
+		RootPanel menu = RootPanel.get("m");
+		menu.clear();
 
-		// Le bouton de partage de la liste
-		Button shareListButton = new Button("Share");
-		shareListButton.addClickHandler(new ClickHandler() {
+		FlowPanel shareListButton = new FlowPanel();
+		shareListButton.getElement().setId("shareListButton");
+		shareListButton.setStylePrimaryName("menu_item");
+		shareListButton.addDomHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				shareList();
 			}
-		});
-		// TODO : Ajouter le style du bouton
-		// TODO : ajouter les index de tabulation
-		this.add(shareListButton);
+		}, ClickEvent.getType());
+		shareListButton.add(new Label("Share"));
+		menu.add(shareListButton);
 
+		// Le bouton de refresh de la liste
+		FlowPanel refreshListButton = new FlowPanel();
+		refreshListButton.getElement().setId("refreshListButton");
+		refreshListButton.setStylePrimaryName("menu_item");
+		refreshListButton.addDomHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				httpGetItems();
+			}
+		}, ClickEvent.getType());
+		refreshListButton.add(new Label("Refresh"));
+		menu.add(refreshListButton);
+
+		// Le bouton de retour à la création d'une liste
+		FlowPanel backToCreateListButton = new FlowPanel();
+		backToCreateListButton.getElement().setId("backToCreateListButton");
+		backToCreateListButton.setStylePrimaryName("menu_item");
+		backToCreateListButton.addDomHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				History.newItem("");
+			}
+		}, ClickEvent.getType());
+		backToCreateListButton.add(new Label("New"));
+		menu.add(backToCreateListButton);
 	}
 
 	/**

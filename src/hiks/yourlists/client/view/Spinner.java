@@ -25,11 +25,11 @@ public class Spinner {
 
 	public void startSpinner() {
 		if (Document.get().getElementById("spinner") == null){
-			RootPanel.get("wizard").add(layer);
+			RootPanel.get("w").add(layer);
 		}
 	}
 
 	public void stopSpinner() {
-		RootPanel.get("wizard").remove(layer);
+		RootPanel.get("w").remove(layer);
 	}
 }

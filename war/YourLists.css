@@ -75,50 +75,40 @@ a img {
 	border-radius: 25px;
 	text-align: center;
 	background-color:#F7F426;
-	font-size: 2.5em;
 	color:#F94A27;
 	margin:5px;
 	padding-top:5%;
 }
 
 #shareListButton{
+	font-size: 2.5em;
 	margin-left: 35px;
-	width:250px;
 }
 
 #refreshListButton{
+	font-size: 2em;
 	margin-left: 20px;
-	width:300px;
 }
 
 #backToCreateListButton{
+	font-size: 1.5em;
 	margin-top: 10px;
 	margin-left: 50px;
-	width:150px;
 }
 
 /** Wizard */
 
 #w{
 	width: 50%;
+	height: 100%;
 	margin:auto;
-}
-
-#w input{
-	width:100%;
-	font-size: 2em;
-}
-
-#w div{
-	width:100%;
-	text-align: center;
 }
 
 /** List Creation Panel */
 
 #itemListCreationPanel{
+	padding-top: 20%;
 	margin : auto;
-	width : 200px;
 }
 
 #itemListNameTextBoxPanel{
@@ -126,7 +116,8 @@ a img {
 }
 
 #itemListNameTextBox{
-	margin : 5px 0px;
+	width:90%;
+	font-size: 2em;
 }
 
 #createListButtonPanel{
@@ -137,6 +128,7 @@ a img {
 /** List Panel */
 
 #itemListNameLabel{
+	text-align: center;
 	font-size: 3em;
 	font-weight: bold;
 	color: #F7F426;
@@ -144,47 +136,57 @@ a img {
 
 #itemListPanel{
 	margin : auto;
-	width : 200px;
 }
 
 
 /** Items */
+
+#items{
+	height: 490px;
+	overflow: auto;
+}
 
 input.error{
 	border-color: red;
 }
 
 #newItemNameTextBox{
-	width : 231px;
+	width:90%;
+	font-size: 2em;
 }
 
 #itemsTable{
 	width : 100%;
 }
 
+#itemsTable tr{
+	vertical-align: top;
+}
+
 .itemsTable-row:hover{
-	background-color : #CCCCCC;
+	background-color : #B3F827;
 } 
+
+#itemsTable div {
+	text-align: left;
+}
 
 /* Item Name */ 
 .item_name {
 	cursor: text;
+	margin: 0 0 10px 10px;
+	font-size: 1.5em;
 }
 
-.item_name .gwt-Label{
-	width: 200px;
-	height: 26px;
-	margin: 8px auto auto 6px;
-}
-
-.item_name .gwt-TextBox{
-	width: 195px;
+.item_name input{
+	width:90%;
+	font-size: 1.5em;
 }
 
 .item_name-disable {
 	font-weight: normal;
 	text-decoration: line-through;
-	color: #CCCCCC;
+	color: #B3F827;
 	cursor: default;
 }
 
@@ -194,11 +196,12 @@ input.error{
 	width: 10px;
 	margin-left: 5px;
 	cursor: default;
+	font-size: 1.5em;
 }
 
 .item_position-disable {
 	text-decoration: line-through;
-	color: #CCCCCC;
+	color: #B3F827;
 }
 
 /** Share Popup */

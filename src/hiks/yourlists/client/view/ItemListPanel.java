@@ -155,6 +155,7 @@ public class ItemListPanel extends WizardPanel{
 	 * Affiche la zone des items
 	 */
 	private void showItemsTable(){
+		FlowPanel items = new FlowPanel();
 		// TODO : Replace FlexTable (GridTable ?) ou carrément des FlowPanel (comment récupérer les items ?)
 		itemsTable = new FlexTable();
 		itemsTable.setBorderWidth(0);
@@ -162,7 +163,9 @@ public class ItemListPanel extends WizardPanel{
 		itemsTable.setCellSpacing(0);
 		itemsTable.getElement().setId("itemsTable");
 		showItems();
-		this.add(itemsTable);
+		items.add(itemsTable);
+		items.getElement().setId("items");
+		this.add(items);
 	}
 
 	/**

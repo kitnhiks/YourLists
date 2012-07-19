@@ -48,18 +48,18 @@ public class ItemListCreationPanel extends WizardPanel{
 		this.add(itemListNameTextBoxPanel);
 
 		// Le bouton de création de la liste
-		FlowPanel createListButtonPanel = new FlowPanel();
-		createListButton = new ButtonWithWait("Create");
-		createListButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				addNewList();
-			}
-		});
-		createListButton.getElement().setId("createListButton");
-		createListButtonPanel.add(createListButton);
-		createListButtonPanel.getElement().setId("createListButtonPanel");
-		this.add(createListButtonPanel);
+//		FlowPanel createListButtonPanel = new FlowPanel();
+//		createListButton = new ButtonWithWait("Create");
+//		createListButton.addClickHandler(new ClickHandler() {
+//			@Override
+//			public void onClick(ClickEvent event) {
+//				addNewList();
+//			}
+//		});
+//		createListButton.getElement().setId("createListButton");
+//		createListButtonPanel.add(createListButton);
+//		createListButtonPanel.getElement().setId("createListButtonPanel");
+//		this.add(createListButtonPanel);
 	}
 	
 	@Override
@@ -87,7 +87,7 @@ public class ItemListCreationPanel extends WizardPanel{
 						logger.log(Level.SEVERE, "[ERROR] "+response.getStatusCode()+" : "+response.getStatusText());
 					}
 					itemListNameTextBox.setEnabled(true);
-					createListButton.stopWaiting(); // TODO : replace par spinner
+					//createListButton.stopWaiting(); // TODO : replace par spinner
 				}
 			});
 	}
@@ -97,7 +97,7 @@ public class ItemListCreationPanel extends WizardPanel{
 	private void addNewList(){
 		itemListNameTextBox.removeStyleName("error");
 		itemListNameTextBox.setEnabled(false);
-		createListButton.setEnabled(false);
+	//	createListButton.setEnabled(false);
 		if (!itemListNameDefaultText.equals(itemListNameTextBox.getText()) 
 				&& !"".equals(itemListNameTextBox.getText()) ){
 			httpCreateListe();

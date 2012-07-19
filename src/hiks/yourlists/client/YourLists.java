@@ -52,6 +52,7 @@ public class YourLists implements EntryPoint, ValueChangeHandler<String> {
 		// On vire le loader
 		spinner.stopSpinner();
 		// On ajoute le panel dans la page
+		RootPanel.get("m").clear();
 		RootPanel.get("w").clear();
 		RootPanel.get("w").add(wizardPanel);
 	}
